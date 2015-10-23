@@ -71,4 +71,52 @@ void set_brake_light(uint8_t state);
 ------------------------------------------------*/
 void set_motor_speed(int8_t speed_percent);
 
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest X acceleration.
+
+@return X-Acceleration [g].
+------------------------------------------------*/
+float get_x_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Y acceleration.
+
+@return Y-Acceleration [g].
+------------------------------------------------*/
+float get_y_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Z acceleration.
+
+@return Z-Acceleration [g].
+------------------------------------------------*/
+float get_z_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest X rotation.
+
+@return X-rotation [degrees/s].
+------------------------------------------------*/
+float get_x_rotation();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Y rotation.
+
+@return Y-rotation [degrees/s].
+------------------------------------------------*/
+float get_y_rotation();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Z rotation.
+
+@return Z-rotation [degrees/s].
+------------------------------------------------*/
+float get_z_rotation();
+
 #endif /* BOARD_H_ */
