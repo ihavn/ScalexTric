@@ -19,17 +19,19 @@ struct serial_struct{
 	void(*_call_back )(serial_p,uint8_t);
 };
 
-#define serBAUD_DIV_CONSTANT			( ( unsigned long ) 16 )
+#define serBAUD_DIV_CONSTANT			8UL
 
+/* Constants for writing to UCSRA. */
+#define serU2X_ENABLE					0x02
 /* Constants for writing to UCSRB. */
-#define serRX_INT_ENABLE				( ( unsigned char ) 0x80 )
-#define serRX_ENABLE					( ( unsigned char ) 0x10 )
-#define serTX_ENABLE					( ( unsigned char ) 0x08 )
-#define serTX_INT_ENABLE				( ( unsigned char ) 0x20 )
+#define serRX_INT_ENABLE				0x80
+#define serRX_ENABLE					0x10
+#define serTX_ENABLE					0x08
+#define serTX_INT_ENABLE				0x20
 
 /* Constants for writing to UCSRC. */
-#define serUCSRC_SELECT					( ( unsigned char ) 0x80 )
-#define serEIGHT_DATA_BITS				( ( unsigned char ) 0x06 )
+#define serUCSRC_SELECT					0x80
+#define serEIGHT_DATA_BITS				0x06
 
 #if defined (__AVR_ATmega2560__)
 volatile uint8_t *_com_port_2_udr[] = {&UDR0, &UDR1, &UDR2, &UDR3};
@@ -42,7 +44,7 @@ static serial_p _ser_handle[] = {NULL, NULL};
 #endif
 
 /* Offset to registers from UDR */
-#define UBRR_off	1
+#define UBRR_off	2
 #define UCSRC_off	4
 #define UCSRB_off	5
 #define UCSRA_off	6
@@ -61,7 +63,7 @@ SREG = _sreg;
 
 /*-----------------------------------------------------------*/
 static void _serial_tx_int_on(volatile uint8_t *UDR_reg) {
-	*(UDR_reg + UCSRB_off) |= serTX_INT_ENABLE;
+	*(UDR_reg  - UCSRB_off) |= serTX_INT_ENABLE;
 }
 
 /*-----------------------------------------------------------*/
@@ -78,21 +80,24 @@ serial_p serial_new_instance(e_com_port_t com_port, uint32_t baud, e_data_bit_t 
 	_serial->_rx_buf = rx_buf;
 	
 	_serial->_call_back = handler_call_back;
-		
+	
 	ES_INIT_CRITICAL_SECTION
 	ES_ENTER_CRITICAL_SECTION
 	{
 		/* Calculate the baud rate register value from the equation in the
 		data sheet. */
+		/* Set double speed */
+		*(_serial->ser_UDR - UCSRA_off) |= serU2X_ENABLE;
+		
 		/* Set the baud rate. */
-		*((_serial->ser_UDR)+UBRR_off) = ( F_CPU / ( serBAUD_DIV_CONSTANT * baud ) ) - ( unsigned long ) 1;
+		*(_serial->ser_UDR - UBRR_off) = ( F_CPU / ( serBAUD_DIV_CONSTANT * baud ) ) - 1UL;
 
 		/* Enable the Rx interrupt.  The Tx interrupt will get enabled
 		later. Also enable the Rx and Tx. */
-		*((_serial->ser_UDR)+UCSRB_off) = ( serRX_INT_ENABLE | serRX_ENABLE | serTX_ENABLE );
+		*((_serial->ser_UDR) - UCSRB_off) = ( serRX_INT_ENABLE | serRX_ENABLE | serTX_ENABLE );
 
 		/* Set the data bits to 8. */
-		*((_serial->ser_UDR)+UCSRC_off) = serEIGHT_DATA_BITS;
+		*((_serial->ser_UDR) - UCSRC_off) = serEIGHT_DATA_BITS;
 	}
 	ES_LEAVE_CRITICAL_SECTION
 	
@@ -112,18 +117,19 @@ uint8_t serial_send_byte(serial_p handle, uint8_t byte )
 }
 
 /*-----------------------------------------------------------*/
-uint8_t serial_send_buf(serial_p handle, uint8_t *buf, uint8_t len )
+uint8_t serial_send_bytes(serial_p handle, uint8_t *buf, uint8_t len )
 {
+	// Check if buffer is full
 	if ( ((handle->_tx_buf != 0) && (len > (BUFFER_SIZE - handle->_tx_buf->no_in_buffer))) || ((handle->_tx_buf == 0) && (len > 1)) ) {
-		// Put in the tx buffer
-		for (uint8_t i = 0; i < len; i++) {
-			buffer_put_item(handle->_tx_buf, buf[i]);
-		}
-		_serial_tx_int_on(handle->ser_UDR);
-		return BUFFER_OK;
+		return BUFFER_FULL;
 	}
 	
-	return BUFFER_FULL;
+	// Put in the tx buffer
+	for (uint8_t i = 0; i < len; i++) {
+		buffer_put_item(handle->_tx_buf, buf[i]);
+	}
+	_serial_tx_int_on(handle->ser_UDR);
+	return BUFFER_OK;
 }
 
 /*-----------------------------------------------------------*/

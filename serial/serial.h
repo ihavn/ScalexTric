@@ -68,7 +68,7 @@ serial_p serial_new_instance(e_com_port_t com_port, uint32_t baud, e_data_bit_t 
 @todo Documentation
 
 */
-uint8_t serial_send_buf(serial_p handle, uint8_t *buf, uint8_t len);
+uint8_t serial_send_bytes(serial_p handle, uint8_t *buf, uint8_t len);
 /* ======================================================================================================================= */
 /**
 @ingroup serial_driver
