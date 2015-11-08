@@ -8,5 +8,7 @@ buffer\buffer.c
 
 main.c
 
+serial\serial.c
+
 spi\spi.c
 

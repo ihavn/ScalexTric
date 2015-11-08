@@ -22,6 +22,17 @@
 
 // USART
 
+// Bluetooth
+#define BT_RTS_PORT				PORTE
+#define BT_RTS_PIN				PE2
+#define BT_CTS_PORT				PORTE
+#define BT_CTS_PIN				PE5
+#define BT_RESET_PORT			PORTA
+#define BT_RESET_PIN			PA0
+#define BT_AUTO_DISCOVERY_PORT	PORTA
+#define BT_AUTO_DISCOVERY_PIN	PA1
+#define BT_MASTER_PORT			PORTA
+#define BT_MASTER_PIN			PA2
 
 // GOAL LINE
 
@@ -39,6 +50,10 @@
 // BRAKE LIGHT
 #define BRAKE_LIGHT_PORT_reg			PORTC
 #define BRAKE_LIGHT_PIN_bit				PC1
+
+// AUX
+#define AUX_PORT_reg					PORTC
+#define AUX_PIN_bit						PC0
 
 // MOTOR CONTROL - Timer 3 used
 #define MOTOR_CONTROL_TCCRA_reg			TCCR3A

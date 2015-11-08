@@ -19,7 +19,6 @@ Here you you will find the functions you will need.
 
 @defgroup board_public Public Declarations, variables etc.
 @brief Declarations, variables etc. that are private for the Board Driver implementation.
-@}
 
 @defgroup board_return Board Driver Return codes
 @brief Codes returned from Board Driver functions.
@@ -97,6 +96,30 @@ float get_z_accel();
 
 /**----------------------------------------------
 @ingroup board_public_function
+@brief Get newest Raw X acceleration.
+
+@return Raw X-Acceleration in binary value.
+------------------------------------------------*/
+int16_t get_raw_x_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Raw Y acceleration.
+
+@return Raw Y-Acceleration in binary value.
+------------------------------------------------*/
+int16_t get_raw_y_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Raw Z acceleration.
+
+@return Raw Z-Acceleration in binary value.
+------------------------------------------------*/
+int16_t get_raw_z_accel();
+
+/**----------------------------------------------
+@ingroup board_public_function
 @brief Get newest X rotation.
 
 @return X-rotation [degrees/s].
@@ -119,4 +142,50 @@ float get_y_rotation();
 ------------------------------------------------*/
 float get_z_rotation();
 
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Raw X rotation.
+
+@return Raw X-rotation in binary value.
+------------------------------------------------*/
+int16_t get_raw_x_rotation();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Raw Y rotation.
+
+@return Raw Y-rotation in binary value.
+------------------------------------------------*/
+int16_t get_raw_y_rotation();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Get newest Raw Z rotation.
+
+@return Raw Z-rotation in binary value.
+------------------------------------------------*/
+int16_t get_raw_z_rotation();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief	Get tacho counts measured
+		since last time the function is called.
+		
+@note	If the counter counts more than 65535 pulses
+		between calls of this function, the result will be wrong.	
+
+@return Tacho counts since last call [0-65535].
+------------------------------------------------*/
+uint16_t get_tacho_count();
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Manipulate with the RESET signal on the Blue tooth module.
+
+After reset/power-on the RESET line is held low/active. 
+@note Before the Blue tooth module can be used the reset must be set inactive.
+
+@param[in] state 0: Inactivate RESET, 1: Activate RESET.
+------------------------------------------------*/
+void set_bt_reset(uint8_t state);
 #endif /* BOARD_H_ */

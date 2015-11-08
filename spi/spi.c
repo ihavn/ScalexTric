@@ -204,8 +204,6 @@ buffer_struct_t *rx_buf, buffer_struct_t *tx_buf, void(*call_back )(spi_p spi, u
 
 	_spi->_call_back = call_back;
 
-	// set CS pin to output
-	*(cs_port+1) |= _BV(cs_pin);
 	// Critical section
 	{
 		// disable interrupt

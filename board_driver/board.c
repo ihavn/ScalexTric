@@ -71,6 +71,9 @@ void init_main_board() {
 	// BRAKE LIGHT
 	*(&BRAKE_LIGHT_PORT_reg - 1) |= _BV(BRAKE_LIGHT_PIN_bit); // set pin to output
 	
+	// AUX
+	*(&AUX_PORT_reg - 1) |= _BV(AUX_PIN_bit); // set pin to output
+	
 	// MOTOR SPEED Fast-PWM ICR = TOP setup
 	// Mode 14
 	MOTOR_CONTROL_TCCRA_reg |= _BV(MOTOR_CONTROL_WGM1_bit);
@@ -98,6 +101,20 @@ void init_main_board() {
 	#elif ((MOTOR_CONTROL_PRESCALER == 1024))
 	MOTOR_CONTROL_TCCRB_reg |= _BV(MOTOR_CONTROL_CS0_bit) | _BV(MOTOR_CONTROL_CS2_bit); ;    // Prescaler 1024 and Start Timer
 	#endif
+	
+	// Bluetooth
+	*(&BT_RTS_PORT - 1) &= ~_BV(BT_RTS_PIN); // set pin to input
+	*(&BT_CTS_PORT - 1) |= _BV(BT_CTS_PIN); // set pin to output
+	BT_CTS_PORT &= ~_BV(BT_CTS_PIN); // Set CTS Low
+	
+	*(&BT_RESET_PORT - 1) |= _BV(BT_RESET_PIN); // set pin to output
+	BT_RESET_PORT &= ~_BV(BT_RESET_PIN); // Set RESET Low/active
+	
+	*(&BT_AUTO_DISCOVERY_PORT - 1) |= _BV(BT_AUTO_DISCOVERY_PIN); // set pin to output
+	BT_AUTO_DISCOVERY_PORT &= ~_BV(BT_AUTO_DISCOVERY_PIN); // Set AUTO_DISCOVERY Low/disable
+	
+	*(&BT_MASTER_PORT - 1) |= _BV(BT_MASTER_PIN); // set pin to output
+	BT_MASTER_PORT &= ~_BV(BT_MASTER_PIN); // Set BT_MASTER Low/client mode
 	
 	_init_mpu9520();
 }
@@ -169,6 +186,21 @@ float get_z_accel() {
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_x_accel() {
+	return _x_acc;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_y_accel() {
+	return _y_acc;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_z_accel() {
+	return _z_acc;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
 float get_x_rotation() {
 	return ((float)_x_gyro)/GYRO_500_DPS_DIVIDER;
 }
@@ -182,6 +214,22 @@ float get_y_rotation() {
 float get_z_rotation() {
 	return ((float)_z_gyro)/GYRO_500_DPS_DIVIDER;
 }
+
+// ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_x_rotation() {
+	return _x_gyro;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_y_rotation() {
+	return _y_gyro;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+int16_t get_raw_z_rotation() {
+	return _z_gyro;
+}
+
 // ----------------------------------------------------------------------------------------------------------------------
 void _init_mpu9520() {
 	_spi_mpu9520 = spi_new_instance(SPI_MODE_MASTER, SPI_CLOCK_DIVIDER_32, 3, SPI_DATA_ORDER_MSB, &PORTB, PB0, 0,	&_mpu9520_rx_buffer, &_mpu9250_tx_buffer, &_mpu9250_call_back);
@@ -299,5 +347,19 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 
 		default:
 		break;
+	}
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+uint16_t get_tacho_count() {
+	return 0;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void set_bt_reset(uint8_t state) {
+	if (state) {
+		BT_RESET_PORT &= ~_BV(BT_RESET_PIN); // Set RESET low/active
+		} else {
+		BT_RESET_PORT |= _BV(BT_RESET_PIN); // Set RESET high/in-active
 	}
 }
