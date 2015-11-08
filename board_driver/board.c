@@ -6,6 +6,7 @@
 #include "board_spec.h"
 #include "../include/board.h"
 #include "../spi/spi.h"
+#include "../serial/serial.h"
 /* ################################################### Global Variables ################################################# */
 /* ############################################ Module Variables/Declarations ########################################### */
 #define MOTOR_CONTROL_PWM_FREQ	25000L
@@ -44,6 +45,7 @@ typedef enum {_mpu9520_init_acc,_mpu9520_init_gyro, _mpu9520_poll_acc, _mpu9520_
 
 // Handle to SPI
 static spi_p _spi_mpu9520 = 0;
+static serial_p _bt_serial_instance = 0;
 
 static buffer_struct_t _mpu9520_rx_buffer;
 static buffer_struct_t _mpu9250_tx_buffer;
@@ -59,6 +61,7 @@ static int16_t _z_gyro = 0;
 void _init_mpu9520();
 static void _mpu9250_write_2_reg(uint8_t reg, uint8_t value);
 static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byte);
+static void _bt_call_back(serial_p _bt_serial_instance, uint8_t serial_last_received_byte);
 
 // ----------------------------------------------------------------------------------------------------------------------
 void init_main_board() {
@@ -115,6 +118,12 @@ void init_main_board() {
 	
 	*(&BT_MASTER_PORT - 1) |= _BV(BT_MASTER_PIN); // set pin to output
 	BT_MASTER_PORT &= ~_BV(BT_MASTER_PIN); // Set BT_MASTER Low/client mode
+	
+	static buffer_struct_t _bt_rx_buffer;
+	static buffer_struct_t _bt_tx_buffer;
+	buffer_init(&_bt_rx_buffer);
+	buffer_init(&_bt_tx_buffer);
+	_bt_serial_instance = serial_new_instance(ser_USART0, 115200UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
 	
 	_init_mpu9520();
 }
@@ -232,6 +241,8 @@ int16_t get_raw_z_rotation() {
 
 // ----------------------------------------------------------------------------------------------------------------------
 void _init_mpu9520() {
+	buffer_init(&_mpu9520_rx_buffer);
+	buffer_init(&_mpu9250_tx_buffer);
 	_spi_mpu9520 = spi_new_instance(SPI_MODE_MASTER, SPI_CLOCK_DIVIDER_32, 3, SPI_DATA_ORDER_MSB, &PORTB, PB0, 0,	&_mpu9520_rx_buffer, &_mpu9250_tx_buffer, &_mpu9250_call_back);
 	_mpu9250_call_back(0,0);
 }
@@ -362,4 +373,9 @@ void set_bt_reset(uint8_t state) {
 		} else {
 		BT_RESET_PORT |= _BV(BT_RESET_PIN); // Set RESET high/in-active
 	}
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+static void _bt_call_back(serial_p _bt_serial_instance, uint8_t serial_last_received_byte) {
+	
 }
