@@ -33,6 +33,7 @@ LIB_DEP:=
 # Every subdirectory with source files must be described here
 SUBDIRS :=  \
 ../buffer/ \
+../dialog_handler/ \
 ../include \
 ../board_driver \
 ../serial \
@@ -43,6 +44,7 @@ SUBDIRS :=  \
 C_SRCS +=  \
 ../board_driver/board.c \
 ../buffer/buffer.c \
+../dialog_handler/dialog_handler.c \
 ../main.c \
 ../serial/serial.c \
 ../spi/spi.c
@@ -57,6 +59,7 @@ ASM_SRCS +=
 OBJS +=  \
 board_driver/board.o \
 buffer/buffer.o \
+dialog_handler/dialog_handler.o \
 main.o \
 serial/serial.o \
 spi/spi.o
@@ -64,6 +67,7 @@ spi/spi.o
 OBJS_AS_ARGS +=  \
 board_driver/board.o \
 buffer/buffer.o \
+dialog_handler/dialog_handler.o \
 main.o \
 serial/serial.o \
 spi/spi.o
@@ -71,6 +75,7 @@ spi/spi.o
 C_DEPS +=  \
 board_driver/board.d \
 buffer/buffer.d \
+dialog_handler/dialog_handler.d \
 main.d \
 serial/serial.d \
 spi/spi.d
@@ -78,6 +83,7 @@ spi/spi.d
 C_DEPS_AS_ARGS +=  \
 board_driver/board.d \
 buffer/buffer.d \
+dialog_handler/dialog_handler.d \
 main.d \
 serial/serial.d \
 spi/spi.d
@@ -104,6 +110,8 @@ LIB_DEP+=
 
 
 
+
+
 board_driver/%.o: ../board_driver/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.8.1
@@ -112,6 +120,13 @@ board_driver/%.o: ../board_driver/%.c
 	
 
 buffer/%.o: ../buffer/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 4.8.1
+	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1056\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=16000000L  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2561 -c -std=c99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
+dialog_handler/%.o: ../dialog_handler/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.8.1
 	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1056\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG -DF_CPU=16000000L  -O0 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2561 -c -std=c99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 

@@ -178,7 +178,7 @@ void dialog_start(dialog_seq_t *p_seq,
  @section Description
  If the maximum wait time is exceeded the the dialog will change to error state.
  */
-void dialog_one_second_tick() {
+void dialog_tick() {
   if (_dialog_second_counter) {
     if (--_dialog_second_counter == 0) {
       _dialog_goto_state(_dialog_seq[_dialog_current_state].error_state);

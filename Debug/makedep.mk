@@ -6,6 +6,8 @@ board_driver\board.c
 
 buffer\buffer.c
 
+dialog_handler\dialog_handler.c
+
 main.c
 
 serial\serial.c

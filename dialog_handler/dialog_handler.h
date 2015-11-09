@@ -59,7 +59,7 @@ typedef struct {
 void dialog_start( dialog_seq_t *p_seq, void (*pf_send)(uint8_t *command, uint8_t command_length),
 		void (*pf_call_back)(uint8_t result));
 
-void dialog_one_second_tick();
+void dialog_tick();
 void dialog_byte_received(const uint8_t ch);
 
 #endif /* DIALOG_HANDLER_H_ */

@@ -30,6 +30,8 @@ Here you you will find the functions you will need.
 
 #include <stdint.h>
 
+#include "../dialog_handler/dialog_handler.h"
+
 /**----------------------------------------------
 @ingroup board_init
 @brief Board Driver initialization.
@@ -188,4 +190,36 @@ After reset/power-on the RESET line is held low/active.
 @param[in] state 0: Inactivate RESET, 1: Activate RESET.
 ------------------------------------------------*/
 void set_bt_reset(uint8_t state);
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Initialise the Bluetooth module.
+
+@note Should be called after RESET is deactivated on the Bluetooth module!
+
+The result of the initialisation can be: DIALOG_OK_STOP when every thing is OK, or DIALOG_ERROR_STOP if the Bluetooth module is not initialised correctly.
+
+@param[in] bt_status_call_back pointer to a function that will be called when the initialisation is done - the result of the initialisation is given as parameter to the function.
+@param[in] bt_com_call_back pointer to a function that will be called for each byte received from the Bluetooth module. The byte is given as parameter.
+------------------------------------------------*/
+void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_call_back)(uint8_t byte));
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief Send a byte array to Bluetooth.
+
+@note The Bluetooth module must be initialised befor sending.
+
+@param[in] bytes pointer to byte array.
+@param[in] len number of bytes to send.
+------------------------------------------------*/
+void bt_send_bytes(uint8_t *bytes, uint8_t len);
+
+/**----------------------------------------------
+@ingroup board_public_function
+@brief A tick function needed for the drivers to work.
+
+@note Must be called every 100 ms!!
+------------------------------------------------*/
+void board_tick_100_ms(void);
 #endif /* BOARD_H_ */

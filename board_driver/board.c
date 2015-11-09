@@ -7,6 +7,7 @@
 #include "../include/board.h"
 #include "../spi/spi.h"
 #include "../serial/serial.h"
+#include "../dialog_handler/dialog_handler.h"
 /* ################################################### Global Variables ################################################# */
 /* ############################################ Module Variables/Declarations ########################################### */
 #define MOTOR_CONTROL_PWM_FREQ	25000L
@@ -47,6 +48,7 @@ typedef enum {_mpu9520_init_acc,_mpu9520_init_gyro, _mpu9520_poll_acc, _mpu9520_
 static spi_p _spi_mpu9520 = 0;
 static serial_p _bt_serial_instance = 0;
 
+// mpu9520
 static buffer_struct_t _mpu9520_rx_buffer;
 static buffer_struct_t _mpu9250_tx_buffer;
 
@@ -57,6 +59,23 @@ static int16_t _z_acc = 0;
 static int16_t _x_gyro = 0;
 static int16_t _y_gyro = 0;
 static int16_t _z_gyro = 0;
+
+// dialog sequences to setup BT module
+typedef enum { eENTER_CMD0=0, eENTER_CMD1, eAUTHENTICATION, eNAME, eREBOOT1, eREBOOT2 } en_init_dialog_states;
+// BT dialog
+dialog_seq_t _dialog_bt_init_seq[] = {
+	{ 0, LEN(0), (uint8_t *)"DUMMY", LEN(5), TO(1), eENTER_CMD1, eENTER_CMD1, DIALOG_NO_BUFFER },  // eENTER_CMD0: Enter command mode
+	{ (uint8_t *)"$$$", LEN(3), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eAUTHENTICATION, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eENTER_CMD1
+	{ (uint8_t *)"SA,1\0x0D", LEN(5), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eNAME, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eAUTHENTICATION: Set to mode 1
+	{ (uint8_t *)"SN,VIA-Car\0x0D", LEN(11), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eREBOOT1, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eNAME: Set device name
+	{ (uint8_t *)"R,1\0x0D", LEN(4), (uint8_t *)"????",LEN(5), TO(3), eREBOOT2, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eREBOOT1: Send R,1
+	{ 0, LEN(0), (uint8_t *)"DUMMY",LEN(5), TO(2), DIALOG_OK_STOP, DIALOG_OK_STOP, DIALOG_NO_BUFFER },  // eREBOOT2: Just a pause to wait for Reboot
+};
+
+static uint8_t _bt_dialog_active = 0;
+// Pointer to Application BT call back functions
+static void (*_app_bt_status_call_back)(uint8_t result) = 0;
+static void (*_app_bt_com_call_back)(uint8_t byte) = 0;
 /* ################################################# Function prototypes ################################################ */
 void _init_mpu9520();
 static void _mpu9250_write_2_reg(uint8_t reg, uint8_t value);
@@ -168,14 +187,13 @@ void set_motor_speed(int8_t speed_percent){
 		speed_percent = 100;
 	}
 	
-	int16_t ocr;
 	if (speed_percent < 0) {
 		MOTOR_CONTROL_OCRA_reg = MOTOR_CONTROL_TOP;
-		ocr = MOTOR_CONTROL_OCRB_reg = (100-(-speed_percent))*MOTOR_CONTROL_TOP/100;
+		MOTOR_CONTROL_OCRB_reg = (100-(-speed_percent))*MOTOR_CONTROL_TOP/100;
 	}
 	else {
 		MOTOR_CONTROL_OCRB_reg = MOTOR_CONTROL_TOP;
-		ocr = MOTOR_CONTROL_OCRA_reg = (100-speed_percent) * MOTOR_CONTROL_TOP/100;
+		MOTOR_CONTROL_OCRA_reg = (100-speed_percent) * MOTOR_CONTROL_TOP/100;
 	}
 }
 
@@ -376,6 +394,46 @@ void set_bt_reset(uint8_t state) {
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
+static void _send_bytes_to_bt(uint8_t *bytes, uint8_t len) {
+	serial_send_bytes(_bt_serial_instance, bytes, len);
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void bt_send_bytes(uint8_t *bytes, uint8_t len) {
+	serial_send_bytes(_bt_serial_instance, bytes, len);
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void _bt_status_call_back(uint8_t result) {
+	_bt_dialog_active = 0;
+	if (_app_bt_status_call_back) {
+		_app_bt_status_call_back(result);
+	}
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_call_back)(uint8_t byte)) {
+	_app_bt_status_call_back = bt_status_call_back;
+	_app_bt_com_call_back = bt_com_call_back;
+	_bt_dialog_active = 1;
+	dialog_start(_dialog_bt_init_seq, _send_bytes_to_bt, _bt_status_call_back);
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
 static void _bt_call_back(serial_p _bt_serial_instance, uint8_t serial_last_received_byte) {
-	
+	if (_bt_dialog_active) {
+		dialog_byte_received(serial_last_received_byte);
+		} else {
+		if (_app_bt_com_call_back) {
+			_app_bt_com_call_back(serial_last_received_byte);
+		}
+	}
+}
+
+
+// ----------------------------------------------------------------------------------------------------------------------
+void board_tick_100_ms(void) {
+	if (_bt_dialog_active) {
+		dialog_tick();
+	}
 }

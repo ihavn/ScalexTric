@@ -173,7 +173,7 @@ ISR(USART1_RX_vect)
 		item = UDR1;
 		buffer_put_item(_ser_handle[ser_USART1]->_rx_buf, item);
 		if (_ser_handle[ser_USART1]->_call_back) {
-			_ser_handle[ser_USART0]->_call_back(_ser_handle[ser_USART1], item);
+			_ser_handle[ser_USART1]->_call_back(_ser_handle[ser_USART1], item);
 		}
 	}
 }
@@ -205,7 +205,7 @@ ISR(USART2_RX_vect)
 {
 	uint8_t item;
 	if (_ser_handle[ser_USART2]) {
-		item = UDR0;
+		item = UDR2;
 		buffer_put_item(_ser_handle[ser_USART2]->_rx_buf, item);
 		if (_ser_handle[ser_USART2]->_call_back) {
 			_ser_handle[ser_USART2]->_call_back(_ser_handle[ser_USART2], item);
