@@ -2,6 +2,7 @@
 
 /* ################################################## Standard includes ################################################# */
 #include <avr/io.h>
+#include <avr/interrupt.h>
 /* ################################################### Project includes ################################################# */
 #include "board_spec.h"
 #include "../include/board.h"
@@ -10,7 +11,7 @@
 #include "../dialog_handler/dialog_handler.h"
 /* ################################################### Global Variables ################################################# */
 /* ############################################ Module Variables/Declarations ########################################### */
-#define MOTOR_CONTROL_PWM_FREQ	25000L
+#define MOTOR_CONTROL_PWM_FREQ	5000L
 #define MOTOR_CONTROL_PRESCALER	1L
 #define MOTOR_CONTROL_TOP		(F_CPU/(MOTOR_CONTROL_PWM_FREQ * MOTOR_CONTROL_PRESCALER)-1L)
 
@@ -65,17 +66,21 @@ typedef enum { eENTER_CMD0=0, eENTER_CMD1, eAUTHENTICATION, eNAME, eREBOOT1, eRE
 // BT dialog
 dialog_seq_t _dialog_bt_init_seq[] = {
 	{ 0, LEN(0), (uint8_t *)"DUMMY", LEN(5), TO(1), eENTER_CMD1, eENTER_CMD1, DIALOG_NO_BUFFER },  // eENTER_CMD0: Enter command mode
-	{ (uint8_t *)"$$$", LEN(3), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eAUTHENTICATION, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eENTER_CMD1
-	{ (uint8_t *)"SA,1\0x0D", LEN(5), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eNAME, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eAUTHENTICATION: Set to mode 1
-	{ (uint8_t *)"SN,VIA-Car\0x0D", LEN(11), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(1), eREBOOT1, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eNAME: Set device name
-	{ (uint8_t *)"R,1\0x0D", LEN(4), (uint8_t *)"????",LEN(5), TO(3), eREBOOT2, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eREBOOT1: Send R,1
-	{ 0, LEN(0), (uint8_t *)"DUMMY",LEN(5), TO(2), DIALOG_OK_STOP, DIALOG_OK_STOP, DIALOG_NO_BUFFER },  // eREBOOT2: Just a pause to wait for Reboot
+	{ (uint8_t *)"$$$", LEN(3), (uint8_t *)"CMD\x0D\x0A",LEN(5), TO(10), eAUTHENTICATION, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eENTER_CMD1
+	{ (uint8_t *)"SA,1\x0D", LEN(5), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eNAME, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eAUTHENTICATION: Set to mode 1
+	{ (uint8_t *)"S-,VIA-Car\x0D", LEN(11), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eREBOOT1, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eNAME: Set device name
+	{ (uint8_t *)"R,1\x0D", LEN(4), (uint8_t *)"Reboot!\x0D\x0A",LEN(9), TO(10), eREBOOT2, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eREBOOT1: Send R,1
+	{ 0, LEN(0), (uint8_t *)"DUMMY",LEN(5), TO(10), DIALOG_OK_STOP, DIALOG_OK_STOP, DIALOG_NO_BUFFER },  // eREBOOT2: Just a pause to wait for Reboot
 };
 
 static uint8_t _bt_dialog_active = 0;
 // Pointer to Application BT call back functions
 static void (*_app_bt_status_call_back)(uint8_t result) = 0;
 static void (*_app_bt_com_call_back)(uint8_t byte) = 0;
+
+// Pointer  to Application goal line passed call back function
+static void (*_app_goal_line_passed_call_back)(void) = 0;
+
 /* ################################################# Function prototypes ################################################ */
 void _init_mpu9520();
 static void _mpu9250_write_2_reg(uint8_t reg, uint8_t value);
@@ -124,10 +129,12 @@ void init_main_board() {
 	MOTOR_CONTROL_TCCRB_reg |= _BV(MOTOR_CONTROL_CS0_bit) | _BV(MOTOR_CONTROL_CS2_bit); ;    // Prescaler 1024 and Start Timer
 	#endif
 	
+	set_motor_speed(0);
+	
 	// Bluetooth
 	*(&BT_RTS_PORT - 1) &= ~_BV(BT_RTS_PIN); // set pin to input
 	*(&BT_CTS_PORT - 1) |= _BV(BT_CTS_PIN); // set pin to output
-	BT_CTS_PORT &= ~_BV(BT_CTS_PIN); // Set CTS Low
+	BT_CTS_PORT &= ~_BV(BT_CTS_PIN); // Set CTS pin Low
 	
 	*(&BT_RESET_PORT - 1) |= _BV(BT_RESET_PIN); // set pin to output
 	BT_RESET_PORT &= ~_BV(BT_RESET_PIN); // Set RESET Low/active
@@ -142,7 +149,7 @@ void init_main_board() {
 	static buffer_struct_t _bt_tx_buffer;
 	buffer_init(&_bt_rx_buffer);
 	buffer_init(&_bt_tx_buffer);
-	_bt_serial_instance = serial_new_instance(ser_USART0, 115200UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+	_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
 	
 	_init_mpu9520();
 }
@@ -178,22 +185,32 @@ void set_brake_light(uint8_t state){
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
-void set_motor_speed(int8_t speed_percent){
-	if (speed_percent < -10) {
-		speed_percent = -10;
-	}
-	else if (speed_percent > 100)
-	{
+void set_motor_speed(uint8_t speed_percent){
+	if (speed_percent > 100) {
 		speed_percent = 100;
 	}
 	
-	if (speed_percent < 0) {
-		MOTOR_CONTROL_OCRA_reg = MOTOR_CONTROL_TOP;
-		MOTOR_CONTROL_OCRB_reg = (100-(-speed_percent))*MOTOR_CONTROL_TOP/100;
+	if  (speed_percent > 0) {
+		MOTOR_CONTROL_OCRA_reg = speed_percent*MOTOR_CONTROL_TOP/100;
+		MOTOR_CONTROL_OCRB_reg = speed_percent*MOTOR_CONTROL_TOP/100;
+		} else { // Free Run
+		MOTOR_CONTROL_OCRA_reg = 0;
+		MOTOR_CONTROL_OCRB_reg = 0;
 	}
-	else {
-		MOTOR_CONTROL_OCRB_reg = MOTOR_CONTROL_TOP;
-		MOTOR_CONTROL_OCRA_reg = (100-speed_percent) * MOTOR_CONTROL_TOP/100;
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void set_brake(uint8_t brake_percent) {
+	if (brake_percent > 100) {
+		brake_percent = 100;
+	}
+	
+	if  (brake_percent > 0) {
+		MOTOR_CONTROL_OCRA_reg = brake_percent*MOTOR_CONTROL_TOP/100;
+		MOTOR_CONTROL_OCRB_reg = 0;
+		} else { // Free Run
+		MOTOR_CONTROL_OCRA_reg = 0;
+		MOTOR_CONTROL_OCRB_reg = 0;
 	}
 }
 
@@ -261,7 +278,7 @@ int16_t get_raw_z_rotation() {
 void _init_mpu9520() {
 	buffer_init(&_mpu9520_rx_buffer);
 	buffer_init(&_mpu9250_tx_buffer);
-	_spi_mpu9520 = spi_new_instance(SPI_MODE_MASTER, SPI_CLOCK_DIVIDER_32, 3, SPI_DATA_ORDER_MSB, &PORTB, PB0, 0,	&_mpu9520_rx_buffer, &_mpu9250_tx_buffer, &_mpu9250_call_back);
+	_spi_mpu9520 = spi_new_instance(SPI_MODE_MASTER, SPI_CLOCK_DIVIDER_128, 3, SPI_DATA_ORDER_MSB, &PORTB, PB0, 0,	&_mpu9520_rx_buffer, &_mpu9250_tx_buffer, &_mpu9250_call_back);
 	_mpu9250_call_back(0,0);
 }
 
@@ -413,8 +430,9 @@ void _bt_status_call_back(uint8_t result) {
 
 // ----------------------------------------------------------------------------------------------------------------------
 void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_call_back)(uint8_t byte)) {
-	_app_bt_status_call_back = bt_status_call_back;
+	// ---------------------------------------------------------------------------------------------------------------------- = bt_status_call_back;
 	_app_bt_com_call_back = bt_com_call_back;
+	_app_bt_status_call_back = bt_status_call_back;
 	_bt_dialog_active = 1;
 	dialog_start(_dialog_bt_init_seq, _send_bytes_to_bt, _bt_status_call_back);
 }
@@ -436,4 +454,10 @@ void board_tick_100_ms(void) {
 	if (_bt_dialog_active) {
 		dialog_tick();
 	}
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+void set_goal_line_call_back(void (*goal_line_passed_call_back)(void)) {
+	if (_app_goal_line_passed_call_back)
+	_app_goal_line_passed_call_back();
 }

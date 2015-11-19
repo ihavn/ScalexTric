@@ -78,12 +78,10 @@ static void (*_dialog_pf_call_back)(uint8_t result);
  @ingroup dialog_handler_private
  @brief Prepare the response to wait for.
 
+ Setup variables to wait for the next expected response.
  @param[in] response_format to be waited for..
  @param[in] len
  @param[out] *buf
-
- @section Description
- Setup variables to wait for the next expected response.
  */
 static void _dialog_await(uint8_t new_state) {
   _dialog_format.response_p = _dialog_format.response =
@@ -108,8 +106,6 @@ static void _dialog_await(uint8_t new_state) {
  ELSE the new State will be setup.
 
  @param[in] new_state the new state to goto.
-
- @section Description
  */
 static void _dialog_goto_state(const uint8_t new_state) {
   _dialog_second_counter = 0;
@@ -147,7 +143,6 @@ static void _dialog_goto_state(const uint8_t new_state) {
  The function must have this signature: <code>func(uint8_t result)</code>.\n
  Arguments: <code>result</code>: result of the dialog sequence: DIALOG_OK_STOP dialog ended with expected result. DIALOG_ERROR_STOP dialog ended with an error.
 
- @section Description
  Example of array of dialog states:
  @code
  dialog_seq_t dialog_seq[] = {
@@ -175,7 +170,6 @@ void dialog_start(dialog_seq_t *p_seq,
  @ingroup dialog_handler_public
  @brief Housekeeping function that must be called every second when a dialog is active.
 
- @section Description
  If the maximum wait time is exceeded the the dialog will change to error state.
  */
 void dialog_tick() {
@@ -190,19 +184,19 @@ void dialog_tick() {
 /**
  @ingroup dialog_handler_public
  @brief Every time a byte is received, this function must be called.
+ 
+The function can be in three different internal states:<br />
+<strong>normal_state</strong>: We are not receiving any arguments right now.<br />
+<strong>arg_state</strong>: We are receiving a fixed length argument (here 5 bytes - format:  %5B).<br />
+<strong>arg_max_state</strong>: We are receiving an variable length argument (here max 6 bytes - format: %*6B),
+when a byte is received that match the next ordinary byte in the format,
+the argument have been received, and we switch to NORMAL_STATE.
+This will also happens if the specified maximum number byte in the argument is received.
+
+If there are specified a pointer to an argument buffer in the current state of the dialog_seq, the received argument bytes will be stored in this buffer, else the argument values will be thrown away.
+
  When/If the expected response string is received the dialog state is changed to the current dialog states OK state.
  @param[in] byte received from device we are communication with.
-
- @section Description
- The function can be in three different internal states:<br />
- <strong>normal_state</strong>: We are not receiving any arguments right now.<br />
- <strong>arg_state</strong>: We are receiving a fixed length argument (here 5 bytes - format:  %5B).<br />
- <strong>arg_max_state</strong>: We are receiving an variable length argument (here max 6 bytes - format: %*6B),
- when a byte is received that match the next ordinary byte in the format,
- the argument have been received, and we switch to NORMAL_STATE.
- This will also happens if the specified maximum number byte in the argument is received.
-
- If there are specified a pointer to an argument buffer in the current state of the dialog_seq, the received argument bytes will be stored in this buffer, else the argument values will be thrown away.
  */
 void dialog_byte_received(const uint8_t byte) {
   uint8_t _retry;
@@ -287,7 +281,6 @@ void dialog_byte_received(const uint8_t byte) {
  @ingroup dialog_handler_private
  @brief Evaluates the next char/chars in the response_format, and prepare the dialog handler for it.
 
- @section Description
  Evaluates the responce_format to see if we are going to receive and argument, either a fixed length argument (here 5 bytes - format:  %5B),<br />
  or a variable length argument (here max 6 bytes - format: %*6B), or an ordinary byte. It also checks for byte stuffing (format: %%).<br />
 

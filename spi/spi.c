@@ -1,8 +1,7 @@
-/** @file spi_iha.c
+/** @file spi.c
 @brief Library to control the SPI communication.
 @author Ib Havn
 @version 1.0.0
-@last
 
 @defgroup spi SPI Driver
 @{

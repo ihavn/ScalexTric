@@ -1,4 +1,4 @@
-/** @file spi_iha_config.h
+/** @file spi_config.h
 @author Ib Havn
 
 @ingroup spi_config

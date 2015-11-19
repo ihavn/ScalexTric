@@ -1,5 +1,5 @@
 /*
-* spi_iha.h
+* spi.h
 *
 * Created: 16-03-2013 11:30:09
 *  Author: IHA

@@ -90,7 +90,7 @@ serial_p serial_new_instance(e_com_port_t com_port, uint32_t baud, e_data_bit_t 
 		*(_serial->ser_UDR - UCSRA_off) |= serU2X_ENABLE;
 		
 		/* Set the baud rate. */
-		*(_serial->ser_UDR - UBRR_off) = ( F_CPU / ( serBAUD_DIV_CONSTANT * baud ) ) - 1UL;
+		*(_serial->ser_UDR - UBRR_off) = ( F_CPU / ( serBAUD_DIV_CONSTANT * baud ) - 1UL);
 
 		/* Enable the Rx interrupt.  The Tx interrupt will get enabled
 		later. Also enable the Rx and Tx. */
@@ -139,6 +139,7 @@ ISR(USART0_RX_vect)
 	if (_ser_handle[ser_USART0]) {
 		item = UDR0;
 		buffer_put_item(_ser_handle[ser_USART0]->_rx_buf, item);
+		
 		if (_ser_handle[ser_USART0]->_call_back) {
 			_ser_handle[ser_USART0]->_call_back(_ser_handle[ser_USART0], item);
 		}
