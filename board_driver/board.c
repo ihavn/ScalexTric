@@ -4,6 +4,10 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 /* ################################################### Project includes ################################################# */
+#include "../FreeRTOS/Source/include/FreeRTOS.h"
+#include "../FreeRTOS/Source/include/task.h"
+#include "../FreeRTOS/Source/include/semphr.h"
+
 #include "board_spec.h"
 #include "../include/board.h"
 #include "../spi/spi.h"
@@ -14,6 +18,10 @@
 #define MOTOR_CONTROL_PWM_FREQ	5000L
 #define MOTOR_CONTROL_PRESCALER	1L
 #define MOTOR_CONTROL_TOP		(F_CPU/(MOTOR_CONTROL_PWM_FREQ * MOTOR_CONTROL_PRESCALER)-1L)
+
+#define DIALOG_HANDLER_FREQ			100L  // Scaled down to 10 Hz in ISR
+#define DIALOG_HANDLER_PRESCALER	1024L
+#define DIALOG_HANDLER_TOP		(F_CPU/(DIALOG_HANDLER_FREQ * DIALOG_HANDLER_PRESCALER)-1L)
 
 // MPU-9250 Gyro/Acc definitions
 // Read bit or to register address to read from it
@@ -76,16 +84,17 @@ dialog_seq_t _dialog_bt_init_seq[] = {
 static uint8_t _bt_dialog_active = 0;
 // Pointer to Application BT call back functions
 static void (*_app_bt_status_call_back)(uint8_t result) = 0;
-static void (*_app_bt_com_call_back)(uint8_t byte) = 0;
+static QueueHandle_t _xRxedCharsQ = NULL;
 
-// Pointer  to Application goal line passed call back function
-static void (*_app_goal_line_passed_call_back)(void) = 0;
+// Semaphore to be given when the goal line is passed.
+static SemaphoreHandle_t  _goal_line_semaphore = NULL;
 
 /* ################################################# Function prototypes ################################################ */
-void _init_mpu9520();
+static void _init_mpu9520();
 static void _mpu9250_write_2_reg(uint8_t reg, uint8_t value);
 static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byte);
 static void _bt_call_back(serial_p _bt_serial_instance, uint8_t serial_last_received_byte);
+static void	_init_dialog_handler_timer();
 
 // ----------------------------------------------------------------------------------------------------------------------
 void init_main_board() {
@@ -145,6 +154,10 @@ void init_main_board() {
 	*(&BT_MASTER_PORT - 1) |= _BV(BT_MASTER_PIN); // set pin to output
 	BT_MASTER_PORT &= ~_BV(BT_MASTER_PIN); // Set BT_MASTER Low/client mode
 	
+	// Enable goal-line interrupt - INT0 falling edge
+	EICRA |= _BV(ISC01);
+	EIMSK |= _BV(INT0);
+	
 	static buffer_struct_t _bt_rx_buffer;
 	static buffer_struct_t _bt_tx_buffer;
 	buffer_init(&_bt_rx_buffer);
@@ -152,6 +165,7 @@ void init_main_board() {
 	_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
 	
 	_init_mpu9520();
+	_init_dialog_handler_timer();
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -429,9 +443,8 @@ void _bt_status_call_back(uint8_t result) {
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
-void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_call_back)(uint8_t byte)) {
-	// ---------------------------------------------------------------------------------------------------------------------- = bt_status_call_back;
-	_app_bt_com_call_back = bt_com_call_back;
+void init_bt_module(void (*bt_status_call_back)(uint8_t result), QueueHandle_t RX_Que) {
+	_xRxedCharsQ = RX_Que;
 	_app_bt_status_call_back = bt_status_call_back;
 	_bt_dialog_active = 1;
 	dialog_start(_dialog_bt_init_seq, _send_bytes_to_bt, _bt_status_call_back);
@@ -442,22 +455,64 @@ static void _bt_call_back(serial_p _bt_serial_instance, uint8_t serial_last_rece
 	if (_bt_dialog_active) {
 		dialog_byte_received(serial_last_received_byte);
 		} else {
-		if (_app_bt_com_call_back) {
-			_app_bt_com_call_back(serial_last_received_byte);
+		if (_xRxedCharsQ) {
+			signed portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+
+			xQueueSendFromISR( _xRxedCharsQ, &serial_last_received_byte, &xHigherPriorityTaskWoken );
+
+			if( xHigherPriorityTaskWoken != pdFALSE )
+			{
+				taskYIELD();
+			}
 		}
 	}
 }
 
-
 // ----------------------------------------------------------------------------------------------------------------------
-void board_tick_100_ms(void) {
-	if (_bt_dialog_active) {
-		dialog_tick();
+void set_goal_line_semaphore(SemaphoreHandle_t goal_line_semaphore) {
+	if (goal_line_semaphore) {
+		_goal_line_semaphore = goal_line_semaphore;
+	}
+}
+
+ISR(INT0_vect) {
+	static signed portBASE_TYPE _higher_priority_task_woken;
+	if (_goal_line_semaphore) {
+		_higher_priority_task_woken = pdFALSE;
+
+		xSemaphoreGiveFromISR(_goal_line_semaphore, &_higher_priority_task_woken);
+		
+		if (_higher_priority_task_woken != pdFALSE) {
+			portYIELD();
+		}
 	}
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
-void set_goal_line_call_back(void (*goal_line_passed_call_back)(void)) {
-	if (_app_goal_line_passed_call_back)
-	_app_goal_line_passed_call_back();
+static void _init_dialog_handler_timer() {
+	DIALOG_HANDLER_OCRA_reg = DIALOG_HANDLER_TOP;
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_WGM1_bit); // CTC Mode
+	DIALOG_HANDLER_TIMSK_reg |= _BV(DIALOG_HANDLER_OCIEA_bit); // Enable Compare A interrupt
+	
+	#if (DIALOG_HANDLER_PRESCALER == 1)
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_CS0_bit);    // Prescaler 1 and Start Timer
+	#elif ((DIALOG_HANDLER_PRESCALER == 8))
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_CS1_bit);    // Prescaler 8 and Start Timer
+	#elif ((DIALOG_HANDLER_PRESCALER == 64))
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_CS0_bit) | _BV(DIALOG_HANDLER_CS1_bit);    // Prescaler 64 and Start Timer
+	#elif ((DIALOG_HANDLER_PRESCALER == 256))
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_CS2_bit);    // Prescaler 256 and Start Timer
+	#elif ((DIALOG_HANDLER_PRESCALER == 1024))
+	DIALOG_HANDLER_TCCRB_reg |= _BV(DIALOG_HANDLER_CS0_bit) | _BV(DIALOG_HANDLER_CS2_bit); ;    // Prescaler 1024 and Start Timer
+	#endif
+}
+
+ISR(TIMER2_COMPA_vect) {
+	static uint8_t _count = 10;
+	if (_bt_dialog_active) {
+		if (--_count == 0) {
+			_count = 10;
+			dialog_tick();
+		}
+	}
 }

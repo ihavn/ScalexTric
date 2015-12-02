@@ -30,6 +30,10 @@ Here you you will find the functions you will need.
 
 #include <stdint.h>
 
+#include "../FreeRTOS/Source/include/FreeRTOS.h"
+#include "../FreeRTOS/Source/include/semphr.h"
+#include "../FreeRTOS/Source/include/queue.h"
+
 #include "../dialog_handler/dialog_handler.h"
 
 //-------------------------------------------------
@@ -39,7 +43,6 @@ Here you you will find the functions you will need.
 
 Initializes the Board Drivers.
 */
-
 void init_main_board();
 
 /**
@@ -64,6 +67,7 @@ void set_head_light(uint8_t state);
 @ingroup board_public_function
 @brief Manipulate with the Car Brake Light.
 
+@param[in] state 0: turn brake light off, 1: turn brake light on.
 */
 void set_brake_light(uint8_t state);
 
@@ -230,14 +234,14 @@ void set_bt_reset(uint8_t state);
 The result of the initialisation can be: DIALOG_OK_STOP when every thing is OK, or DIALOG_ERROR_STOP if the Bluetooth module is not initialised correctly.
 
 @param[in] *bt_status_call_back pointer to a function that will be called when the initialisation is done - the result of the initialisation is given as parameter to the function.
-@param[in] *bt_com_call_back pointer to a function that will be called for each byte received from the Bluetooth module. The byte is given as parameter.
+@param[in] RX_Que FreeRTOS Queue where bytes received from the Bluetooth module will be put.
 
-The two call back function must have this signature:
+The  call back function must have this signature:
 @code
 void foo(uint8_t)
 @endcode
 */
-void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_call_back)(uint8_t byte));
+void init_bt_module(void (*bt_status_call_back)(uint8_t result), QueueHandle_t RX_Que) ;
 
 //-------------------------------------------------
 /**
@@ -252,26 +256,12 @@ void init_bt_module(void (*bt_status_call_back)(uint8_t result), void (*bt_com_c
 void bt_send_bytes(uint8_t *bytes, uint8_t len);
 
 //-------------------------------------------------
-/** 
-@ingroup board_public_function
-@brief A tick function needed for the drivers to work.
-
-@note Must be called every 100 ms!!
-*/
-void board_tick_100_ms(void);
-
-//-------------------------------------------------
 /**
 @ingroup board_public_function
-@brief The specified function will be called when the track goal line is passed.
+@brief The specified semaphore will be given when the track goal line is passed.
 
-@param[in] *goal_line_passed_call_back pointer to a function that will be called when car pass the track goal line.
-
-The call back function must have this signature:
-@code
-void foo(void)
-@endcode
+@param[in] goal_line_semaphore that will be given when the goal line is passed.
 */
-void set_goal_line_call_back(void (*goal_line_passed_call_back)(void));
+void set_goal_line_semaphore(SemaphoreHandle_t goal_line_semaphore);
 
 #endif /* BOARD_H_ */

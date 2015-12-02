@@ -20,9 +20,8 @@
 #define SPI_MOSI	PB2
 #define SPI_MISO	PB3
 
-// USART
-
 // Bluetooth
+// USART 0 used for Bluetooth communication
 #define BT_RTS_PORT				PORTE
 #define BT_RTS_PIN				PE2
 #define BT_CTS_PORT				PORTE
@@ -34,10 +33,31 @@
 #define BT_MASTER_PORT			PORTA
 #define BT_MASTER_PIN			PA2
 
-// GOAL LINE
+// GOAL LINE + INT0 used
 
-
-// TACHO
+// TACHO - Timer 1 used
+#define TACHO_TCCRA_reg			TCCR1A
+#define TACHO_TCCRB_reg			TCCR1B
+#define TACHO_TCCRC_reg			TCCR1C
+#define TACHO_COMA0_bit			COM1A0
+#define TACHO_COMA1_bit			COM1A1
+#define TACHO_COMB0_bit			COM1B0
+#define TACHO_COMB1_bit			COM1B1
+#define TACHO_COMC0_bit			COM1C0
+#define TACHO_COMC1_bit			COM1C1
+#define TACHO_WGM0_bit			WGM10
+#define TACHO_WGM1_bit			WGM11
+#define TACHO_WGM2_bit			WGM12
+#define TACHO_WGM3_bit			WGM13
+#define TACHO_CS0_bit			CS10
+#define	TACHO_CS1_bit			CS11
+#define TACHO_CS2_bit			CS12
+#define TACHO_OCRA_reg			OCR1A
+#define TACHO_OCRB_reg			OCR1B
+#define TACHO_OCRC_reg			OCR1C
+#define TACHO_ICR_reg			ICR1
+#define TACHO_TIMSK_reg			TIMSK1
+#define TACHO_TIFR_reg			TIFR1
 
 // HORN
 #define HORN_PORT_reg					PORTC
@@ -83,4 +103,25 @@
 #define MOTOR_CONTROL_OCA_PIN_bit		PE3
 #define MOTOR_CONTROL_OCB_PORT_reg		PORTE
 #define MOTOR_CONTROL_OCB_PIN_bit		PE4
+
+// Timer 2 used for generating 100ms ticks for dialog handler in driver 
+#define DIALOG_HANDLER_TCCRA_reg			TCCR2A
+#define DIALOG_HANDLER_TCCRB_reg			TCCR2B
+#define DIALOG_HANDLER_COMA0_bit			COM2A0
+#define DIALOG_HANDLER_COMA1_bit			COM2A1
+#define DIALOG_HANDLER_COMB0_bit			COM2B0
+#define DIALOG_HANDLER_COMB1_bit			COM2B1
+#define DIALOG_HANDLER_WGM0_bit				WGM20
+#define DIALOG_HANDLER_WGM1_bit				WGM21
+#define DIALOG_HANDLER_WGM2_bit				WGM22
+#define DIALOG_HANDLER_CS0_bit				CS20
+#define	DIALOG_HANDLER_CS1_bit				CS21
+#define DIALOG_HANDLER_CS2_bit				CS22
+#define DIALOG_HANDLER_OCRA_reg				OCR2A
+#define DIALOG_HANDLER_OCRB_reg				OCR2B
+#define DIALOG_HANDLER_TIMSK_reg			TIMSK2
+#define DIALOG_HANDLER_TIFR_reg				TIFR2
+#define DIALOG_HANDLER_TOIE_bit				TOIE2
+#define DIALOG_HANDLER_OCIEA_bit			OCIE2A
+
 #endif /* BOARD_SPEC_H_ */
