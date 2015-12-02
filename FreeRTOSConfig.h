@@ -87,7 +87,7 @@
 #define portUSE_TIMER0					// portUSE_TIMER0 to use 8 bit Timer0
 
 #define configUSE_PREEMPTION			1
-#define configUSE_IDLE_HOOK				1
+#define configUSE_IDLE_HOOK				0
 #define configUSE_TICK_HOOK				0
 #define configCPU_CLOCK_HZ				( ( unsigned long ) F_CPU )
 #define configTICK_RATE_HZ				( ( TickType_t ) 1000 )

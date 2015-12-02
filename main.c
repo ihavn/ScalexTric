@@ -114,7 +114,6 @@ static void vjustATask( void *pvParameters ) {
 	{
 		// Wait for goal line is passed
 		xSemaphoreTake(goal_line_semaphore, portMAX_DELAY);
-
 	}
 }
 
@@ -151,18 +150,12 @@ static void vstartupTask( void *pvParameters ) {
 int main(void)
 {
 	init_main_board();
-	xTaskCreate( vstartupTask, "Startup Task", configMINIMAL_STACK_SIZE, NULL, startup_TASK_PRIORITY, NULL );
+	xTaskCreate( vstartupTask, "StartupTask", configMINIMAL_STACK_SIZE, NULL, startup_TASK_PRIORITY, NULL );
 	vTaskStartScheduler();
 }
 
 
 // Called is TASK Stack overflows
 void vApplicationStackOverflowHook( TaskHandle_t xTask, char *pcTaskName ) {
-	// What will you do here?????
-}
-
-// Probally not needed
-void vApplicationIdleHook( void )
-{
-	vCoRoutineSchedule();
+	set_horn(1);
 }
