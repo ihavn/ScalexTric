@@ -128,6 +128,8 @@ typedef unsigned char UBaseType_t;
 #define portTICK_PERIOD_MS			( ( TickType_t ) 1000 / configTICK_RATE_HZ )
 #define portBYTE_ALIGNMENT			1
 #define portNOP()					__asm__ __volatile__ ( "nop" )
+#define portPOINTER_SIZE_TYPE		uint16_t  // IHA Added 2015-12-03
+
 /*-----------------------------------------------------------*/
 
 /* Kernel utilities. */
