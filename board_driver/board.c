@@ -83,7 +83,7 @@ dialog_seq_t _dialog_bt_init_seq[] = {
 
 static uint8_t _bt_dialog_active = 0;
 // Pointer to Application BT call back functions
-static void (*_app_bt_status_call_back)(uint8_t result) = 0;
+static void (*_app_bt_status_call_back)(uint8_t result) = NULL;
 static QueueHandle_t _xRxedCharsQ = NULL;
 
 // Semaphore to be given when the goal line is passed.
