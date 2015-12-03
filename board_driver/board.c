@@ -233,62 +233,110 @@ void set_brake(uint8_t brake_percent) {
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_x_accel() {
-	return ((float)_x_acc)/ACC_2G_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_x_acc)/ACC_2G_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_y_accel() {
-	return ((float)_y_acc)/ACC_2G_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_y_acc)/ACC_2G_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_z_accel() {
-	return ((float)_z_acc)/ACC_2G_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_z_acc)/ACC_2G_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_x_accel() {
-	return _x_acc;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _x_acc;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_y_accel() {
-	return _y_acc;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _y_acc;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_z_accel() {
-	return _z_acc;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _z_acc;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_x_rotation() {
-	return ((float)_x_gyro)/GYRO_500_DPS_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_x_gyro)/GYRO_500_DPS_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_y_rotation() {
-	return ((float)_y_gyro)/GYRO_500_DPS_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_y_gyro)/GYRO_500_DPS_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 float get_z_rotation() {
-	return ((float)_z_gyro)/GYRO_500_DPS_DIVIDER;
+	uint8_t _sreg = SREG;
+	cli();
+	float _tmp = ((float)_z_gyro)/GYRO_500_DPS_DIVIDER;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_x_rotation() {
-	return _x_gyro;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _x_gyro;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_y_rotation() {
-	return _y_gyro;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _y_gyro;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
 int16_t get_raw_z_rotation() {
-	return _z_gyro;
+	uint8_t _sreg = SREG;
+	cli();
+	int16_t _tmp = _z_gyro;
+	SREG = _sreg;
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -371,6 +419,8 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 		case _mpu9520_read_acc:
 		{
 			if (buffer_no_of_items(&_mpu9520_rx_buffer) == 7) {
+				uint8_t _sreg = SREG;
+				cli();
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb); // Throw away the command response
 				buffer_get_item(&_mpu9520_rx_buffer, &msb);
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb);
@@ -380,6 +430,7 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 				_y_acc = (msb << 8) | lsb;
 				buffer_get_item(&_mpu9520_rx_buffer, &msb);
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb);
+				SREG = _sreg;
 				_z_acc = (msb << 8) | lsb;
 				
 				state = _mpu9520_read_gyro;
@@ -391,6 +442,8 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 		case _mpu9520_read_gyro:
 		{
 			if (buffer_no_of_items(&_mpu9520_rx_buffer) == 7) {
+				uint8_t _sreg = SREG;
+				cli();
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb); // Throw away the command response
 				buffer_get_item(&_mpu9520_rx_buffer, &msb);
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb);
@@ -400,6 +453,7 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 				_y_gyro = (msb << 8) | lsb;
 				buffer_get_item(&_mpu9520_rx_buffer, &msb);
 				buffer_get_item(&_mpu9520_rx_buffer, &lsb);
+				SREG = _sreg;
 				_z_gyro = (msb << 8) | lsb;
 
 				state = _mpu9520_read_acc;
