@@ -444,8 +444,8 @@ static void _send_bytes_to_bt(uint8_t *bytes, uint8_t len) {
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
-void bt_send_bytes(uint8_t *bytes, uint8_t len) {
-	serial_send_bytes(_bt_serial_instance, bytes, len);
+uint8_t bt_send_bytes(uint8_t *bytes, uint8_t len) {
+	return serial_send_bytes(_bt_serial_instance, bytes, len);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------

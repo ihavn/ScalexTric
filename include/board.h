@@ -36,6 +36,10 @@ Here you you will find the functions you will need.
 
 #include "../dialog_handler/dialog_handler.h"
 
+#define BUFFER_OK 0
+#define BUFFER_EMPTY 1
+#define BUFFER_FULL 2
+
 //-------------------------------------------------
 /** 
 @ingroup board_init
@@ -252,8 +256,10 @@ void init_bt_module(void (*bt_status_call_back)(uint8_t result), QueueHandle_t R
 
 @param[in] bytes pointer to byte array.
 @param[in] len number of bytes to send.
+
+@return Buffer status [BUFFER_OK, BUFFER_EMPTY, BUFFER_FULL].
 */
-void bt_send_bytes(uint8_t *bytes, uint8_t len);
+uint8_t bt_send_bytes(uint8_t *bytes, uint8_t len);
 
 //-------------------------------------------------
 /**
