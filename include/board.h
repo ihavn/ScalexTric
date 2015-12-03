@@ -36,6 +36,10 @@ Here you you will find the functions you will need.
 
 #include "../dialog_handler/dialog_handler.h"
 
+#define BUFFER_OK 0
+#define BUFFER_EMPTY 1
+#define BUFFER_FULL 2
+
 //-------------------------------------------------
 /** 
 @ingroup board_init
