@@ -248,12 +248,14 @@ void init_bt_module(void (*bt_status_call_back)(uint8_t result), QueueHandle_t R
 @ingroup board_public_function
 @brief Send a byte array to Bluetooth.
 
-@note The Bluetooth module must be initialised befor sending.
+@note The Bluetooth module must be initialised before sending.
 
 @param[in] bytes pointer to byte array.
 @param[in] len number of bytes to send.
+
+@return Buffer status [BUFFER_OK, BUFFER_EMPTY, BUFFER_FULL].
 */
-void bt_send_bytes(uint8_t *bytes, uint8_t len);
+uint8_t bt_send_bytes(uint8_t *bytes, uint8_t len);
 
 //-------------------------------------------------
 /**
