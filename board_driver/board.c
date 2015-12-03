@@ -472,13 +472,14 @@ uint16_t get_tacho_count() {
 	static uint16_t _last_reading = 0;
 	
 	uint16_t _tmp = TACHO_TCNT_reg;
+	uint16_t _tmp_last = _tmp;
 	
 	if (_tmp < _last_reading) {
 		_tmp = (UINT16_MAX - _last_reading + _tmp);
-	} else {
+		} else {
 		_tmp = _tmp-_last_reading;
 	}
-	_last_reading = _tmp;
+	_last_reading = _tmp_last;
 	
 	return _tmp;
 }
