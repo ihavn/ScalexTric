@@ -58,6 +58,7 @@
 #define TACHO_ICR_reg			ICR1
 #define TACHO_TIMSK_reg			TIMSK1
 #define TACHO_TIFR_reg			TIFR1
+#define TACHO_TCNT_reg			TCNT1
 
 // HORN
 #define HORN_PORT_reg					PORTC

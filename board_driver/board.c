@@ -137,8 +137,11 @@ void init_main_board() {
 	#elif ((MOTOR_CONTROL_PRESCALER == 1024))
 	MOTOR_CONTROL_TCCRB_reg |= _BV(MOTOR_CONTROL_CS0_bit) | _BV(MOTOR_CONTROL_CS2_bit); ;    // Prescaler 1024 and Start Timer
 	#endif
-	
 	set_motor_speed(0);
+	
+	// TACHO Counter
+	// External Clock source - Falling Edge
+	TACHO_TCCRB_reg |= _BV(TACHO_CS2_bit) | _BV(TACHO_CS1_bit);
 	
 	// Bluetooth
 	*(&BT_RTS_PORT - 1) &= ~_BV(BT_RTS_PIN); // set pin to input
@@ -412,7 +415,18 @@ static void _mpu9250_call_back(spi_p spi_instance, uint8_t spi_last_received_byt
 
 // ----------------------------------------------------------------------------------------------------------------------
 uint16_t get_tacho_count() {
-	return 0;
+	static uint16_t _last_reading = 0;
+	
+	uint16_t _tmp = TACHO_TCNT_reg;
+	
+	if (_tmp < _last_reading) {
+		_tmp = (UINT16_MAX - _last_reading + _tmp);
+	} else {
+		_tmp = _tmp-_last_reading;
+	}
+	_last_reading = _tmp;
+	
+	return _tmp;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
