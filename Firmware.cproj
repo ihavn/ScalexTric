@@ -27,17 +27,17 @@
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <AsfFrameworkConfig>
       <framework-data>
-  <options />
-  <configurations />
-  <files />
-  <documentation help="" />
-  <offline-documentation help="" />
-  <dependencies>
-    <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.10.1" />
-  </dependencies>
-</framework-data>
+        <options />
+        <configurations />
+        <files />
+        <documentation help="" />
+        <offline-documentation help="" />
+        <dependencies>
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.10.1" />
+        </dependencies>
+      </framework-data>
     </AsfFrameworkConfig>
-    <avrtool>com.atmel.avrdbg.tool.jtagicemkii</avrtool>
+    <avrtool>com.atmel.avrdbg.tool.stk600</avrtool>
     <com_atmel_avrdbg_tool_simulator>
       <ToolOptions>
         <InterfaceProperties>
@@ -55,7 +55,7 @@
       <ToolOptions>
         <InterfaceProperties>
           <IspClock>636500</IspClock>
-          <JtagDbgClock>2000</JtagDbgClock>
+          <JtagDbgClock>0</JtagDbgClock>
           <JtagEnableExtResetOnStartSession>true</JtagEnableExtResetOnStartSession>
           <JtagInChain>false</JtagInChain>
           <JtagDevicesBefore>0</JtagDevicesBefore>
@@ -70,7 +70,7 @@
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.stk600</ToolType>
-      <ToolNumber>0045E5507FF9</ToolNumber>
+      <ToolNumber>0045E5508102</ToolNumber>
       <ToolName>STK600</ToolName>
     </com_atmel_avrdbg_tool_stk600>
     <com_atmel_avrdbg_tool_atmelice>
@@ -97,7 +97,6 @@
     <com_atmel_avrdbg_tool_jtagicemkii>
       <ToolOptions>
         <InterfaceProperties>
-          <JtagDbgClock>274370</JtagDbgClock>
         </InterfaceProperties>
         <InterfaceName>JTAG</InterfaceName>
       </ToolOptions>
@@ -202,6 +201,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="dialog_handler\dialog_handler.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="errors.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="errors.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="FreeRTOSConfig.h">

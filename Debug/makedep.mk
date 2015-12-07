@@ -8,6 +8,8 @@ buffer\buffer.c
 
 dialog_handler\dialog_handler.c
 
+errors.c
+
 FreeRTOS\Source\croutine.c
 
 FreeRTOS\Source\event_groups.c

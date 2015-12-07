@@ -53,6 +53,7 @@ C_SRCS +=  \
 ../board_driver/board.c \
 ../buffer/buffer.c \
 ../dialog_handler/dialog_handler.c \
+../errors.c \
 ../FreeRTOS/Source/croutine.c \
 ../FreeRTOS/Source/event_groups.c \
 ../FreeRTOS/Source/list.c \
@@ -76,6 +77,7 @@ OBJS +=  \
 board_driver/board.o \
 buffer/buffer.o \
 dialog_handler/dialog_handler.o \
+errors.o \
 FreeRTOS/Source/croutine.o \
 FreeRTOS/Source/event_groups.o \
 FreeRTOS/Source/list.o \
@@ -92,6 +94,7 @@ OBJS_AS_ARGS +=  \
 board_driver/board.o \
 buffer/buffer.o \
 dialog_handler/dialog_handler.o \
+errors.o \
 FreeRTOS/Source/croutine.o \
 FreeRTOS/Source/event_groups.o \
 FreeRTOS/Source/list.o \
@@ -108,6 +111,7 @@ C_DEPS +=  \
 board_driver/board.d \
 buffer/buffer.d \
 dialog_handler/dialog_handler.d \
+errors.d \
 FreeRTOS/Source/croutine.d \
 FreeRTOS/Source/event_groups.d \
 FreeRTOS/Source/list.d \
@@ -124,6 +128,7 @@ C_DEPS_AS_ARGS +=  \
 board_driver/board.d \
 buffer/buffer.d \
 dialog_handler/dialog_handler.d \
+errors.d \
 FreeRTOS/Source/croutine.d \
 FreeRTOS/Source/event_groups.d \
 FreeRTOS/Source/list.d \
@@ -179,6 +184,8 @@ LINKER_SCRIPT_DEP+=
 
 
 
+
+
 board_driver/%.o: ../board_driver/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.8.1
@@ -200,6 +207,13 @@ dialog_handler/%.o: ../dialog_handler/%.c
 	@echo Finished building: $<
 	
 
+./%.o: .././%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 4.8.1
+	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DGCC_MEGA_AVR -DF_CPU=16000000L -DDEBUG  -I"../FreeRTOS/Source/include" -I"../FreeRTOS/Source/portable/GCC/ATMega256x" -I".."  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2561 -c -std=c99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
+
 FreeRTOS/Source/%.o: ../FreeRTOS/Source/%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.8.1
@@ -215,13 +229,6 @@ FreeRTOS/Source/portable/GCC/ATMega256x/%.o: ../FreeRTOS/Source/portable/GCC/ATM
 	
 
 FreeRTOS/Source/portable/MemMang/%.o: ../FreeRTOS/Source/portable/MemMang/%.c
-	@echo Building file: $<
-	@echo Invoking: AVR/GNU C Compiler : 4.8.1
-	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DGCC_MEGA_AVR -DF_CPU=16000000L -DDEBUG  -I"../FreeRTOS/Source/include" -I"../FreeRTOS/Source/portable/GCC/ATMega256x" -I".."  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2561 -c -std=c99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
-	@echo Finished building: $<
-	
-
-./%.o: .././%.c
 	@echo Building file: $<
 	@echo Invoking: AVR/GNU C Compiler : 4.8.1
 	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DGCC_MEGA_AVR -DF_CPU=16000000L -DDEBUG  -I"../FreeRTOS/Source/include" -I"../FreeRTOS/Source/portable/GCC/ATMega256x" -I".."  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega2561 -c -std=c99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
