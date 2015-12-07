@@ -8,3 +8,4 @@ FreeRTOS/Source/readme.txt
 *.lss
 *.map
 *.srec
+*.atsuo
