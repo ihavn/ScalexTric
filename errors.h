@@ -2,9 +2,8 @@
  * errors.h
  *
  * Created: 07/12/2015 16:00:13
- *  Author: Peter
+ *  Author: Peter Skrypalle
  */ 
-
 
 #ifndef ERRORS_H_
 #define ERRORS_H_

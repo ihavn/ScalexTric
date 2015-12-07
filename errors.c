@@ -2,7 +2,7 @@
  * errors.c
  *
  * Created: 07/12/2015 15:58:24
- *  Author: Peter
+ *  Author: Peter Skrypalle
  */ 
 
 #include "errors.h"

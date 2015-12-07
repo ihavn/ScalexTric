@@ -1,10 +1,9 @@
 /*
-* main.c
-*
-* Created: 21-10-2015 11:48:30
-*  Author: IHA
-*/
-
+ * errors.h
+ *
+ * Created: 07/12/2015 16:00:13
+ *  Author: Peter Skrypalle
+ */ 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
