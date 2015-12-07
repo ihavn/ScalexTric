@@ -9,3 +9,5 @@ FreeRTOS/Source/readme.txt
 *.map
 *.srec
 *.atsuo
+
+/.idea
