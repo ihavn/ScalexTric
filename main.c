@@ -20,11 +20,10 @@
 #include "errors.h"
 
 #define startup_TASK_PRIORITY				( tskIDLE_PRIORITY )
-#define just_a_task_TASK_PRIORITY			( tskIDLE_PRIORITY + 1 )
 
-static const uint8_t      BT_RX_QUEUE_LENGTH       = 30; 
-static SemaphoreHandle_t  goal_line_semaphore      = NULL;
-static QueueHandle_t      xBT_received_chars_queue = NULL;
+static const uint8_t           BT_RX_QUEUE_LENGTH       = 30;
+static       SemaphoreHandle_t goal_line_semaphore      = NULL;
+static       QueueHandle_t     xBT_received_chars_queue = NULL;
 
 uint8_t bt_initialised = 0;
 
