@@ -63,6 +63,7 @@ C_SRCS +=  \
 ../FreeRTOS/Source/tasks.c \
 ../FreeRTOS/Source/timers.c \
 ../main.c \
+../marshal.c \
 ../serial/serial.c \
 ../spi/spi.c
 
@@ -87,6 +88,7 @@ FreeRTOS/Source/queue.o \
 FreeRTOS/Source/tasks.o \
 FreeRTOS/Source/timers.o \
 main.o \
+marshal.o \
 serial/serial.o \
 spi/spi.o
 
@@ -104,6 +106,7 @@ FreeRTOS/Source/queue.o \
 FreeRTOS/Source/tasks.o \
 FreeRTOS/Source/timers.o \
 main.o \
+marshal.o \
 serial/serial.o \
 spi/spi.o
 
@@ -121,6 +124,7 @@ FreeRTOS/Source/queue.d \
 FreeRTOS/Source/tasks.d \
 FreeRTOS/Source/timers.d \
 main.d \
+marshal.d \
 serial/serial.d \
 spi/spi.d
 
@@ -138,6 +142,7 @@ FreeRTOS/Source/queue.d \
 FreeRTOS/Source/tasks.d \
 FreeRTOS/Source/timers.d \
 main.d \
+marshal.d \
 serial/serial.d \
 spi/spi.d
 
@@ -155,6 +160,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

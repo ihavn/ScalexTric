@@ -28,6 +28,8 @@ FreeRTOS\Source\timers.c
 
 main.c
 
+marshal.c
+
 serial\serial.c
 
 spi\spi.c

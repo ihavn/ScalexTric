@@ -22,15 +22,24 @@ static void err_notify() { beep(500); vTaskDelay(500); }
 
 void err_mem_alloc() {
 	err_notify();
+	/* .... */
 	ERR(beep_shrt(); beep_shrt(); beep_shrt(); beep_shrt();)
 }
 
 void err_bt_comm() {
 	err_notify();
-	ERR(beep_long(); beep_shrt(); beep_shrt(); beep_shrt();)
+	/* ..._ */
+	ERR(beep_shrt(); beep_shrt(); beep_shrt(); beep_long();)
 }
 
 void err_stack_overflow() {
 	err_notify();
-	ERR(beep_shrt(); beep_long(); beep_shrt(); beep_shrt();)
+	/* .._. */
+	ERR(beep_shrt(); beep_shrt(); beep_long(); beep_shrt();)
+}
+
+void err_instruction_overflow() {
+	err_notify();
+	/* ..__ */
+	ERR(beep_shrt(); beep_shrt(); beep_long(); beep_long();)
 }

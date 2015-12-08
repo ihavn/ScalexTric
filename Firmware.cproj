@@ -296,6 +296,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="marshal.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="marshal.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="serial\serial.c">
       <SubType>compile</SubType>
     </Compile>

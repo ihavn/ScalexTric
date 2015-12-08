@@ -100,6 +100,7 @@
 #define configIDLE_SHOULD_YIELD			1
 #define configQUEUE_REGISTRY_SIZE		0
 #define configCHECK_FOR_STACK_OVERFLOW	1
+#define configUSE_MUTEXES               1
 
 
 /* Co-routine definitions. */

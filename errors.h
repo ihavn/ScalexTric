@@ -15,5 +15,6 @@
 void err_mem_alloc();
 void err_bt_comm();
 void err_stack_overflow();
+void err_instruction_overflow();
 
 #endif /* ERRORS_H_ */
