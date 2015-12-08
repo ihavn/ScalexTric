@@ -7,6 +7,8 @@
 
 #include "errors.h"
 
+#define ERR(X...) for(;;) { X vTaskDelay(5000); }
+
 static void beep(uint16_t len) {
 	set_horn(1);
 	vTaskDelay((TickType_t) len);
@@ -20,15 +22,15 @@ static void err_notify() { beep(500); vTaskDelay(500); }
 
 void err_mem_alloc() {
 	err_notify();
-	beep_shrt(); beep_shrt(); beep_shrt(); beep_shrt();
+	ERR(beep_shrt(); beep_shrt(); beep_shrt(); beep_shrt();)
 }
 
 void err_bt_comm() {
 	err_notify();
-	beep_long(); beep_shrt(); beep_shrt(); beep_shrt();
+	ERR(beep_long(); beep_shrt(); beep_shrt(); beep_shrt();)
 }
 
 void err_stack_overflow() {
 	err_notify();
-	beep_shrt(); beep_long(); beep_shrt(); beep_shrt();
+	ERR(beep_shrt(); beep_long(); beep_shrt(); beep_shrt();)
 }
