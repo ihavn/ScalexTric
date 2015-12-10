@@ -64,10 +64,12 @@ static void brake(uint8_t brake) {
 
 #pragma region FSM
 
-#define CMD_LEARN   0b0001
-#define CMD_PROGRAM 0b0010
-#define CMD_RUN     0b0011
-#define CMD_M_CTRL  0b0100
+#define BT_CMD_RESET     0b11111111
+
+#define CMD_LEARN        0b0001
+#define CMD_PROGRAM      0b0010
+#define CMD_RUN          0b0011
+#define CMD_M_CTRL       0b0100
 
 #define SUB_PROGRAM_STEP 0b0010
 #define SUB_PROGRAM_STOP 0b1111
@@ -91,6 +93,7 @@ typedef struct {
 
 static Entry instructions[MAX_INSTRUCTIONS];
 static uint16_t pc;
+static uint8_t  dc;
 
 static State idle_state(uint8_t bt_cmd);
 static State m_ctrl_state(uint8_t bt_cmd);
@@ -103,6 +106,13 @@ static State run_state(uint8_t bt_cmd);
 
 void fsm_run(uint8_t bt_cmd) {
 	static State state = IDLE;
+
+	if(bt_cmd == BT_CMD_RESET) {
+		pc=0;
+		dc=0;
+		brake(100);
+		state = IDLE;
+	}
 
 	switch(state) {
 	case IDLE:
@@ -130,8 +140,7 @@ void fsm_run(uint8_t bt_cmd) {
 
 State idle_state(uint8_t bt_cmd) {
 	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
-	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
-	
+
 	switch(cmd) {
 	case CMD_M_CTRL:
 		return m_ctrl_state(bt_cmd);
@@ -167,13 +176,14 @@ State m_ctrl_state(uint8_t bt_cmd) {
 }
 
 State learn_state(uint8_t bt_cmd) {
-	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
-	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
-	uint8_t n_laps  = sub_cmd;
+	uint8_t n_laps  = (bt_cmd     ) & 0xf;
 
 	reset_lap_num();
-	drive(70);
+	get_tacho_count(); /* discard */
+	drive(65);
 	uint8_t n;
+	uint8_t n_max = 0;
+	uint16_t ttl_tacho = 0;
 	while((n = get_lap_num()) < n_laps) {
 		/* learning_response                                                                      */
 		/* -------------------------------------------------------------------------------------- */
@@ -183,8 +193,15 @@ State learn_state(uint8_t bt_cmd) {
 		/* -------------------------------------------------------------------------------------- */
 		bt_send_u8(0b00010000 | (n&0b00001111));
 		
+		if(n_max < n) {
+			n_max = n;
+			ttl_tacho = 0;
+		}
+		
+		ttl_tacho += get_tacho_count();
+
 		bt_send_u16(xTaskGetTickCount());
-		bt_send_u16(get_tacho_count());
+		bt_send_u16(ttl_tacho);
 		bt_send_u16(get_raw_x_accel());
 		bt_send_u16(get_raw_y_accel());
 		bt_send_u16(get_raw_z_accel());
@@ -209,7 +226,6 @@ State learn_state(uint8_t bt_cmd) {
 
 State programmable_state(uint8_t bt_cmd) {
 	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
-	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
 
 	switch(cmd) {
 	case CMD_PROGRAM:
@@ -224,17 +240,20 @@ State program_state(uint8_t bt_cmd) {
 	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
 	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
 
+	/* program_request                              */
+	/* -------------------------------------------- */
+	/* | CMD  |  SUB_CMD | N_TACHO | TARGET_SPEED | */
+	/* -------------------------------------------- */
+	/* | 0010 |     0010 |     u16 |        uint8 | */
+	/* -------------------------------------------- */
 	switch(cmd) {
 	case CMD_PROGRAM:
 		switch(sub_cmd) {
 		case SUB_PROGRAM_STEP:
+			/* discard CMD and SUB_CMD and treat */
+			/* the following 3 bytes as raw data */
 			return PROGRAM_STEP;
 		case SUB_PROGRAM_STOP:
-			for(uint16_t i=0; i<pc; ++i) {
-				Entry e = instructions[i];
-				bt_send_u16(e.tacho);
-				bt_send_u8(e.speed);
-			}
 			return RUNNABLE;
 		}
 	}
@@ -244,12 +263,11 @@ State program_state(uint8_t bt_cmd) {
 
 State program_step_state(uint8_t data) {
 	static uint8_t buf[3];
-	static uint8_t idx;
 
-	buf[idx++] = data;
-	idx%=3;
+	buf[dc++] = data;
+	dc %= 3;
 
-	if(idx == 0) {
+	if(dc == 0) {
 		if(pc > MAX_INSTRUCTIONS)
 			err_instruction_overflow();
 		Entry e;
@@ -264,7 +282,6 @@ State program_step_state(uint8_t data) {
 
 State runnable_state(uint8_t bt_cmd) {
 	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
-	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
 
 	switch(cmd) {
 	case CMD_RUN:
@@ -275,10 +292,8 @@ State runnable_state(uint8_t bt_cmd) {
 }
 
 State run_state(uint8_t bt_cmd) {
-	uint8_t cmd     = (bt_cmd >> 4) & 0xf;
-	uint8_t sub_cmd = (bt_cmd     ) & 0xf;
+	uint8_t n_laps  = (bt_cmd     ) & 0xf;
 
-	uint8_t n_laps = sub_cmd;
 	if(n_laps == 0)
 		return IDLE;
 	
