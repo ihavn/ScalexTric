@@ -23,6 +23,8 @@
 #define startup_TASK_PRIORITY               ( tskIDLE_PRIORITY     )
 #define lap_counter_TASK_PRIORITY           ( tskIDLE_PRIORITY + 1 )
 
+#define DEBUG 1
+
 static const uint8_t BT_RX_QUEUE_LENGTH = 30;
 
 static SemaphoreHandle_t sem_goal_line            = NULL;
@@ -254,6 +256,14 @@ State program_state(uint8_t bt_cmd) {
 			/* the following 3 bytes as raw data */
 			return PROGRAM_STEP;
 		case SUB_PROGRAM_STOP:
+			/* send instructions before running  */
+#ifdef DEBUG
+			for(uint16_t i=0; i<pc; ++i) {
+				Entry e = instructions[i];
+				bt_send_u16(e.tacho);
+				bt_send_u8(e.speed);
+			}
+#endif
 			return RUNNABLE;
 		}
 	}
@@ -297,6 +307,7 @@ State run_state(uint8_t bt_cmd) {
 	if(n_laps == 0)
 		return IDLE;
 	
+	get_tacho_count(); /* discard */
 	for(uint8_t lap=0; lap<n_laps; ++lap) {
 		uint16_t ttl_tacho = 0;
 		for(uint16_t i=0; i<pc; ++i) {
@@ -310,6 +321,7 @@ State run_state(uint8_t bt_cmd) {
 				drive((uint8_t) e.speed);
 		}
 	}
+	brake(100);
 	
 	return RUNNABLE;
 }
@@ -378,9 +390,9 @@ static void vLapCounterTask(void* pvParameters) {
 static void vMainTask(void* pvParameters) {
 	(void) pvParameters; /* The parameters are not used. */
 	
-	sem_goal_line = xSemaphoreCreateBinary();
 	xBT_received_chars_queue = xQueueCreate(BT_RX_QUEUE_LENGTH, (unsigned portBASE_TYPE) sizeof(uint8_t));
 
+	sem_goal_line = xSemaphoreCreateBinary();
 	if(sem_goal_line == NULL) {
 		/* There was insufficient OpenRTOS heap available */
 		/* for the semaphore to be created successfully.  */
