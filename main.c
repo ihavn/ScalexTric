@@ -23,7 +23,7 @@
 #define startup_TASK_PRIORITY               ( tskIDLE_PRIORITY     )
 #define lap_counter_TASK_PRIORITY           ( tskIDLE_PRIORITY + 1 )
 
-#define DEBUG 1
+#define DEBUG 0
 
 static const uint8_t BT_RX_QUEUE_LENGTH = 30;
 
@@ -347,31 +347,6 @@ void bt_cmd_callback(uint8_t cmd) {
 	}
 	
 	fsm_run(cmd);
-}
-
-void bt_debug_callback(uint8_t cmd) {
-	if (!bt_initialised) {
-		err_bt_comm();
-		return;
-	}
-
-	switch (cmd) {
-		case 'x': { err_mem_alloc();      break; }
-		case 'y': { err_bt_comm();        break; }
-		case 'z': { err_stack_overflow(); break; }
-
-		case 'a': {	set_head_light(0);    break; }
-		case 'A': { set_head_light(1);    break; }
-		case 'b': { set_brake_light(0);   break; }
-		case 'B': { set_brake_light(1);   break; }
-		case 'c': { set_horn(0);          break; }
-		case 'C': { set_horn(1);          break; }
-
-		case 'd': { set_motor_speed(0);  set_head_light(0);  break; }
-		case 'D': { set_motor_speed(60); set_head_light(1);  break; }
-		case 'e': { set_brake(0);        set_brake_light(0); break; }
-		case 'E': { set_brake(100);      set_brake_light(1); break; }
-	}
 }
 
 #pragma endregion
