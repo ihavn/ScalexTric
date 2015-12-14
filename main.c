@@ -185,6 +185,22 @@ State learn_state(uint8_t bt_cmd) {
 	uint8_t n_max = 0;
 	uint16_t ttl_tacho = 0;
 	while((n = get_lap_num()) < n_laps) {
+		uint16_t tick = xTaskGetTickCount();
+
+		if(n_max < n) {
+			n_max = n;
+			ttl_tacho = 0;
+		}
+
+		ttl_tacho += get_tacho_count();
+		
+		uint16_t xAcc = get_raw_x_accel();
+		uint16_t yAcc = get_raw_y_accel();
+		uint16_t zAcc = get_raw_z_accel();
+		uint16_t xRot = get_raw_x_rotation();
+		uint16_t yRot = get_raw_y_rotation();
+		uint16_t zRot = get_raw_z_rotation();
+
 		/* learning_response                                                                      */
 		/* -------------------------------------------------------------------------------------- */
 		/* | CMD  | N_ROUND | TICKS_T | N_TACHO | X_ACC | Y_ACC | Z_ACC | X_ROT | Y_ROT | Z_ROT | */
@@ -192,22 +208,14 @@ State learn_state(uint8_t bt_cmd) {
 		/* | 0001 |    xxxx |     u16 |     u16 |   u16 |   u16 |   u16 |   u16 |   u16 |   u16 | */
 		/* -------------------------------------------------------------------------------------- */
 		bt_send_u8(0b00010000 | (n&0b00001111));
-		
-		if(n_max < n) {
-			n_max = n;
-			ttl_tacho = 0;
-		}
-		
-		ttl_tacho += get_tacho_count();
-
-		bt_send_u16(xTaskGetTickCount());
+		bt_send_u16(tick);
 		bt_send_u16(ttl_tacho);
-		bt_send_u16(get_raw_x_accel());
-		bt_send_u16(get_raw_y_accel());
-		bt_send_u16(get_raw_z_accel());
-		bt_send_u16(get_raw_x_rotation());
-		bt_send_u16(get_raw_y_rotation());
-		bt_send_u16(get_raw_z_rotation());
+		bt_send_u16(xAcc);
+		bt_send_u16(yAcc);
+		bt_send_u16(zAcc);
+		bt_send_u16(xRot);
+		bt_send_u16(yRot);
+		bt_send_u16(zRot);
 		
 		vTaskDelay(20);
 	}
