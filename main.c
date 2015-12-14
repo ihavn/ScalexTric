@@ -23,8 +23,6 @@
 #define startup_TASK_PRIORITY               ( tskIDLE_PRIORITY     )
 #define lap_counter_TASK_PRIORITY           ( tskIDLE_PRIORITY + 1 )
 
-#define DEBUG 0
-
 static const uint8_t BT_RX_QUEUE_LENGTH = 30;
 
 static SemaphoreHandle_t sem_goal_line            = NULL;
@@ -109,7 +107,7 @@ static State run_state(uint8_t bt_cmd);
 void fsm_run(uint8_t bt_cmd) {
 	static State state = IDLE;
 
-	if(bt_cmd == BT_CMD_RESET) {
+	if(state != PROGRAM_STEP && bt_cmd == BT_CMD_RESET) {
 		pc=0;
 		dc=0;
 		brake(100);
@@ -164,8 +162,8 @@ State m_ctrl_state(uint8_t bt_cmd) {
 			return IDLE;
 		}
 		uint8_t speed = sub_cmd;
-		speed *= 3;
-		speed += 55;
+		speed *= 4;
+		speed += 40;
         if (speed > 100)
 			speed = 100;
         if (speed < 0)
@@ -256,14 +254,6 @@ State program_state(uint8_t bt_cmd) {
 			/* the following 3 bytes as raw data */
 			return PROGRAM_STEP;
 		case SUB_PROGRAM_STOP:
-			/* send instructions before running  */
-#ifdef DEBUG
-			for(uint16_t i=0; i<pc; ++i) {
-				Entry e = instructions[i];
-				bt_send_u16(e.tacho);
-				bt_send_u8(e.speed);
-			}
-#endif
 			return RUNNABLE;
 		}
 	}
@@ -284,6 +274,7 @@ State program_step_state(uint8_t data) {
 		e.tacho = (uint16_t) (buf[0]<<8 | buf[1]);
 		e.speed = buf[2];
 		instructions[pc++] = e;
+		bt_send_u8(1); // Send ACK
 		return PROGRAM;
 	}
 	
