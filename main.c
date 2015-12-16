@@ -158,8 +158,8 @@ State m_ctrl_state(uint8_t bt_cmd) {
 	switch(cmd) {
 	case CMD_M_CTRL:
 		if(sub_cmd == 0) {
-			brake(100);
-			return IDLE;
+			drive(0);
+			return M_CTRL;
 		}
 		uint8_t speed = sub_cmd;
 		speed *= 4;
