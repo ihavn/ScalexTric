@@ -176,11 +176,14 @@ State m_ctrl_state(uint8_t bt_cmd) {
 }
 
 State learn_state(uint8_t bt_cmd) {
-	uint8_t n_laps  = (bt_cmd     ) & 0xf;
+	uint8_t speed  = (bt_cmd     ) & 0xf;
+	speed *= 4;
+	speed += 40;
 
+	uint8_t n_laps = 1;
 	reset_lap_num();
 	get_tacho_count(); /* discard */
-	drive(65);
+	drive(speed);
 	uint8_t n;
 	uint8_t n_max = 0;
 	uint16_t ttl_tacho = 0;
