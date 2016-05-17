@@ -133,6 +133,12 @@ uint8_t serial_send_bytes(serial_p handle, uint8_t *buf, uint8_t len )
 }
 
 /*-----------------------------------------------------------*/
+uint8_t serial_set_baudrate(serial_p handle, uint16_t baud) {
+	// todo Implement!!!
+	return 0;
+}
+
+/*-----------------------------------------------------------*/
 ISR(USART0_RX_vect)
 {
 	uint8_t item;

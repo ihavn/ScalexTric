@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 // Max size 255
-#define BUFFER_SIZE 16
+#define BUFFER_SIZE 64
 
 /**
    @ingroup buffer_return

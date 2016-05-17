@@ -1,15 +1,13 @@
 /*! @file serial.h
-@brief Serial driver for the USART0.
+@brief Serial driver for the USARTs.
 
 @author iha
 
-@defgroup  serial_driver Driver for ATMEGA52561 USART0.
+@defgroup  serial_driver Driver for ATMEGA2560 and ATMEGA2561.
 @{
-@brief A driver for USART0.
+@brief A driver for USARTs
 
-@note Only implemented for USART0!!!!
 @note Only implemented for 8,N,1 Data format!!!!
-
 @}
 */
 #ifndef SERIAL_H
@@ -61,6 +59,7 @@ typedef enum
 
 */
 serial_p serial_new_instance(e_com_port_t com_port, uint32_t baud, e_data_bit_t data_bit, e_stop_bit_t stop_bit, e_parity_t parity, buffer_struct_t *rx_buf, buffer_struct_t *tx_buf, void(*handler_call_back )(serial_p, uint8_t));
+
 /* ======================================================================================================================= */
 /**
 @ingroup serial_driver
@@ -69,6 +68,7 @@ serial_p serial_new_instance(e_com_port_t com_port, uint32_t baud, e_data_bit_t 
 
 */
 uint8_t serial_send_bytes(serial_p handle, uint8_t *buf, uint8_t len);
+
 /* ======================================================================================================================= */
 /**
 @ingroup serial_driver
@@ -78,5 +78,13 @@ uint8_t serial_send_bytes(serial_p handle, uint8_t *buf, uint8_t len);
 */
 uint8_t serial_send_byte(serial_p handle, uint8_t byte);
 
+/* ======================================================================================================================= */
+/**
+@ingroup serial_driver
+
+@todo Documentation
+
+*/
+uint8_t serial_set_baudrate(serial_p handle, uint16_t baud);
 #endif
 

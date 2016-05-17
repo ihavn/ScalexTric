@@ -70,13 +70,14 @@ static int16_t _y_gyro = 0;
 static int16_t _z_gyro = 0;
 
 // dialog sequences to setup BT module
-typedef enum { eENTER_CMD0=0, eENTER_CMD1, eAUTHENTICATION, eNAME, eREBOOT1, eREBOOT2 } en_init_dialog_states;
+typedef enum { eENTER_CMD0=0, eENTER_CMD1, eAUTHENTICATION, eNAME, eBAUD, eREBOOT1, eREBOOT2 } en_init_dialog_states;
 // BT dialog
 dialog_seq_t _dialog_bt_init_seq[] = {
 	{ 0, LEN(0), (uint8_t *)"DUMMY", LEN(5), TO(1), eENTER_CMD1, eENTER_CMD1, DIALOG_NO_BUFFER },  // eENTER_CMD0: Enter command mode
 	{ (uint8_t *)"$$$", LEN(3), (uint8_t *)"CMD\x0D\x0A",LEN(5), TO(10), eAUTHENTICATION, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eENTER_CMD1
 	{ (uint8_t *)"SA,1\x0D", LEN(5), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eNAME, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eAUTHENTICATION: Set to mode 1
-	{ (uint8_t *)"S-,VIA-Car\x0D", LEN(11), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eREBOOT1, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eNAME: Set device name
+	{ (uint8_t *)"S-,VIA-Car\x0D", LEN(11), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eBAUD, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eNAME: Set device name
+	{ (uint8_t *)"SU,57\x0D", LEN(6), (uint8_t *)"AOK\x0D\x0A",LEN(5), TO(10), eREBOOT1, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eBAUD: Set baud rate to 57600
 	{ (uint8_t *)"R,1\x0D", LEN(4), (uint8_t *)"Reboot!\x0D\x0A",LEN(9), TO(10), eREBOOT2, DIALOG_ERROR_STOP, DIALOG_NO_BUFFER },  // eREBOOT1: Send R,1
 	{ 0, LEN(0), (uint8_t *)"DUMMY",LEN(5), TO(10), DIALOG_OK_STOP, DIALOG_OK_STOP, DIALOG_NO_BUFFER },  // eREBOOT2: Just a pause to wait for Reboot
 };
@@ -165,7 +166,8 @@ void init_main_board() {
 	static buffer_struct_t _bt_tx_buffer;
 	buffer_init(&_bt_rx_buffer);
 	buffer_init(&_bt_tx_buffer);
-	_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+	//_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+	_bt_serial_instance = serial_new_instance(ser_USART0, 57000UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
 	
 	_init_mpu9520();
 	_init_dialog_handler_timer();

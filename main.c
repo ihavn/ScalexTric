@@ -114,6 +114,9 @@ static void vjustATask( void *pvParameters ) {
 	{
 		// Wait for goal line is passed
 		xSemaphoreTake(goal_line_semaphore, portMAX_DELAY);
+		set_horn(1);
+		vTaskDelay( 200/ portTICK_PERIOD_MS);		
+		set_horn(0);
 	}
 }
 
@@ -142,6 +145,9 @@ static void vstartupTask( void *pvParameters ) {
 	uint8_t _byte;
 	
 	for( ;; ) {
+		set_brake_light(PIND & _BV(PD6));
+		set_head_light(PIND & _BV(PD0));
+
 		xQueueReceive( _xBT_received_chars_queue, &_byte, portMAX_DELAY );
 		bt_com_call_back(_byte);
 	}
@@ -150,6 +156,7 @@ static void vstartupTask( void *pvParameters ) {
 int main(void)
 {
 	init_main_board();
+	
 	xTaskCreate( vstartupTask, "StartupTask", configMINIMAL_STACK_SIZE, NULL, startup_TASK_PRIORITY, NULL );
 	vTaskStartScheduler();
 }
