@@ -114,6 +114,9 @@ static void vjustATask( void *pvParameters ) {
 	{
 		// Wait for goal line is passed
 		xSemaphoreTake(goal_line_semaphore, portMAX_DELAY);
+		set_horn(1);
+		vTaskDelay( 200/ portTICK_PERIOD_MS);
+		set_horn(0);
 	}
 }
 
