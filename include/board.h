@@ -240,6 +240,8 @@ The  call back function must have this signature:
 @code
 void foo(uint8_t)
 @endcode
+
+@note Baudrate for Bluetooth communication is 57.2K
 */
 void init_bt_module(void (*bt_status_call_back)(uint8_t result), QueueHandle_t RX_Que) ;
 
