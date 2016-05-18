@@ -166,8 +166,11 @@ void init_main_board() {
 	static buffer_struct_t _bt_tx_buffer;
 	buffer_init(&_bt_rx_buffer);
 	buffer_init(&_bt_tx_buffer);
-	//_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+#ifdef B9600
+	_bt_serial_instance = serial_new_instance(ser_USART0, 9600UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+#else
 	_bt_serial_instance = serial_new_instance(ser_USART0, 57000UL, ser_BITS_8, ser_STOP_1, ser_NO_PARITY, &_bt_rx_buffer, &_bt_tx_buffer, _bt_call_back);
+#endif
 	
 	_init_mpu9520();
 	_init_dialog_handler_timer();

@@ -114,9 +114,11 @@ static void vjustATask( void *pvParameters ) {
 	{
 		// Wait for goal line is passed
 		xSemaphoreTake(goal_line_semaphore, portMAX_DELAY);
+#ifndef B9600
 		set_horn(1);
 		vTaskDelay( 200/ portTICK_PERIOD_MS);		
 		set_horn(0);
+#endif
 	}
 }
 
@@ -145,11 +147,13 @@ static void vstartupTask( void *pvParameters ) {
 	uint8_t _byte;
 	
 	for( ;; ) {
+#ifdef B9600		
 		set_brake_light(PIND & _BV(PD6));
 		set_head_light(PIND & _BV(PD0));
-
+#else
 		xQueueReceive( _xBT_received_chars_queue, &_byte, portMAX_DELAY );
 		bt_com_call_back(_byte);
+#endif
 	}
 }
 
