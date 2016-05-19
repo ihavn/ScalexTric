@@ -8,3 +8,5 @@ FreeRTOS/Source/readme.txt
 *.lss
 *.map
 *.srec
+doxygen/
+doxySettings.xml
