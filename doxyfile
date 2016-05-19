@@ -32,13 +32,13 @@ DOXYFILE_ENCODING      = UTF-8
 # title of most generated pages and in a few other places.
 # The default value is: My Project.
 
-PROJECT_NAME           = "ScalexTric Firmware"
+PROJECT_NAME           = Firmware
 
 # The PROJECT_NUMBER tag can be used to enter a project or revision number. This
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = v0.0.4
+PROJECT_NUMBER         = v0.0.5
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -58,7 +58,7 @@ PROJECT_LOGO           =
 # entered, it will be relative to the location where doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = .\doxygen-doc
+OUTPUT_DIRECTORY       = "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\doxygen"
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create 4096 sub-
 # directories (in 2 levels) under the output directory of each output format and
@@ -753,7 +753,49 @@ WARN_LOGFILE           =
 # spaces.
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = .
+INPUT                  = "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\board_driver\board.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\board_driver\board_spec.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\buffer\buffer.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\buffer\buffer.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\dialog_handler\dialog_handler.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\dialog_handler\dialog_handler.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\croutine.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\deprecated_definitions.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\event_groups.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\FreeRTOS.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\list.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\mpu_wrappers.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\portable.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\projdefs.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\queue.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\semphr.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\StackMacros.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\stdint.readme" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\task.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\include\timers.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\GCC\ATMega256x\port.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\GCC\ATMega256x\portmacro.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\MemMang\heap_1.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\MemMang\heap_2.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\MemMang\heap_3.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\MemMang\heap_4.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\MemMang\heap_5.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\portable\readme.txt" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\croutine.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\event_groups.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\list.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\queue.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\readme.txt" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\tasks.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOS\Source\timers.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\include\board.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\serial\serial.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\serial\serial.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\spi\spi.c" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\spi\spi.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\spi\spi_config.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\FreeRTOSConfig.h" \
+                         "D:\VIAUC\My Documents\Atmel Studio\6.2\ScalexTric\Firmware\main.c"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
